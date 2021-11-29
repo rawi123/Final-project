@@ -30,7 +30,9 @@ const getAllPokemons = async (req, res) => {
     }
 }
 
+
+
 module.exports = {
     addPokemon,
-    getAllPokemons
+    getAllPokemons,
 }

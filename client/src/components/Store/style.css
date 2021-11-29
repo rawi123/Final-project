@@ -1,0 +1,51 @@
+.store{
+    position: absolute;
+    width: 50%;
+    height: 70%;
+    background: #a85808;
+    border-radius: 15px;
+    border: 7px solid gray;
+    left: 25%;
+    top: 15%;
+    z-index: 10;
+    animation: appear .4s ease forwards;
+}
+.store h2{
+    margin-top: 0.6rem;
+    font-size: 2rem;
+}
+.store-items{
+    overflow: auto;
+    padding: 1rem;
+}
+.none{
+    position: absolute;
+    width: 50%;
+    height: 70%;
+    background: #a85808;
+    border-radius: 15px;
+    border: 7px solid gray;
+    left: 25%;
+    top: 15%;
+    z-index: 10;
+    animation: disappear .4s ease forwards;
+}
+.noneAbsolute{
+    display: none;
+}
+@keyframes disappear {
+    0%{
+        transform: scale(1);
+    }
+    100%{
+        transform: scale(0);
+    }
+}
+@keyframes appear {
+    0%{
+        transform: scale(0);
+    }
+    100%{
+        transform: scale(1);
+    }
+}

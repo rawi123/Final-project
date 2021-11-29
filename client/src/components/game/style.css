@@ -1,0 +1,10 @@
+.board-global-container{
+    width: 100vw;
+    height: 100vh;
+    background:url("../../images/board-background.jpg")no-repeat center center/cover ;
+}
+.board-container{
+    width: 100vh;
+    height: 100vh;
+    background: white;
+}

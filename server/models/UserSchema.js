@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const jwt = require("jsonwebtoken");
-const bcrypt=require("bcrypt");
+const bcrypt = require("bcrypt");
 
 const userSchema = new Schema({
     username: {
@@ -25,13 +25,17 @@ const userSchema = new Schema({
         type: Number,
         default: 0
     },
-    pokemons: [{
-        pokemon: {
+    pokemons: [
+        {
             type: mongoose.Schema.Types.ObjectId,
             ref: "pokemon",
             default: null
         }
-    }],
+    ],
+    money: {
+        type: Number,
+        default: 0
+    },
     tokens: [{
         token: {
             type: String,
@@ -54,7 +58,7 @@ userSchema.methods.generateAuthToken = async function () {
     const token = jwt.sign({ _id: user._id.toString() }, process.env.TOKEN)
     user["tokens"] = user.tokens.concat({ token })
     await user.save()
-    return token
+    return token;
 }
 
 userSchema.statics.findByCredentials = async (usernameProp, password) => {
