@@ -12,14 +12,6 @@ export default function Store({ classToPut, setStore }) {
     const { pokemons } = useSelector(state => state?.pokemons);
     const { user } = useSelector(state => state?.user);
 
-    useEffect(() => {
-        if (!pokemons) {
-            (async () => {
-                const pokemons = await getPokemons();
-                dispatch(setPokemons({ pokemons }))
-            })()
-        }
-    }, [pokemons])
 
     const closeStore = () => {
         setStore("none")

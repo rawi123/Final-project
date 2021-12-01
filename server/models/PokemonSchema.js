@@ -16,13 +16,17 @@ const pokemonSchema = new Schema({
         type: Number,
         required: true
     },
-    def:{
-        type:Number,
-        required:true
+    def: {
+        type: Number,
+        required: true
     },
-    cost:{
-        type:Number,
-        required:true
+    cost: {
+        type: Number,
+        required: true
+    },
+    color: {
+        type: String,
+        required: true
     }
 })
 

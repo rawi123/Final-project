@@ -4,7 +4,123 @@
     background:url("../../images/board-background.jpg")no-repeat center center/cover ;
 }
 .board-container{
-    width: 100vh;
-    height: 100vh;
-    background: white;
+    width: 100vmin;
+    height: 100vmin;
+    background: yellow;
+}
+.board {
+    display: grid;
+    height: 100vmin;
+    width: 100vmin;
+    grid-template-columns: repeat(13, 1fr);
+    grid-template-rows: repeat(13, 1fr);
+    grid-column-gap: 3px;
+    grid-row-gap: 3px;
+    background: url("../../images/boardbackground.jpg")no-repeat center center/cover;
+
+    }
+
+.land{
+    background: white; 
+    text-align: center;
+    height: 100%;
+    width: 100% ;
+    min-height: calc(100vmin / 13);
+    min-width: calc(100vmin / 13);
+    justify-content: center;
+    overflow-wrap: break-word;
+    font-size: 1.4rem;
+    opacity: 0.9;
+    overflow: hidden;
+    position: relative;
+}
+.land>div{
+    width: 100% ;
+}
+
+    
+.land1 { grid-area: 12 / 12 / 14 / 14; }
+.land2 { grid-area: 11 / 12 / 12 / 14; }
+.land3 { grid-area: 10 / 12 / 11 / 14; }
+.land4 { grid-area: 9 / 12 / 10 / 14; }
+.land5 { grid-area: 8 / 12 / 9 / 14; }
+.land6 { grid-area: 7 / 12 / 8 / 14; }
+.land7 { grid-area: 6 / 12 / 7 / 14; }
+.land8 { grid-area: 5 / 12 / 6 / 14; }
+.land9 { grid-area: 4 / 12 / 5 / 14; }
+.land10 { grid-area: 3 / 12 / 4 / 14; }
+.land11 { grid-area: 1 / 12 / 3 / 14; }
+.land12 { grid-area: 1 / 11 / 3 / 12; }
+.land13 { grid-area: 1 / 10 / 3 / 11; }
+.land14 { grid-area: 1 / 9 / 3 / 10; }
+.land15 { grid-area: 1 / 8 / 3 / 9; }
+.land16 { grid-area: 1 / 7 / 3 / 8; }
+.land17 { grid-area: 1 / 6 / 3 / 7; }
+.land18 { grid-area: 1 / 5 / 3 / 6; }
+.land19 { grid-area: 1 / 4 / 3 / 5; }
+.land20 { grid-area: 1 / 3 / 3 / 4; }
+.land21 { grid-area: 1 / 1 / 3 / 3; }
+.land22 { grid-area: 3 / 1 / 4 / 3; }
+.land23 { grid-area: 4 / 1 / 5 / 3; }
+.land24 { grid-area: 5 / 1 / 6 / 3; }
+.land25 { grid-area: 6 / 1 / 7 / 3; }
+.land26 { grid-area: 7 / 1 / 8 / 3; }
+.land27 { grid-area: 8 / 1 / 9 / 3; }
+.land28 { grid-area: 9 / 1 / 10 / 3; }
+.land29 { grid-area: 10 / 1 / 11 / 3; }
+.land30 { grid-area: 11 / 1 / 12 / 3; }
+.land31 { grid-area: 12 / 1 / 14 / 3; }
+.land32 { grid-area: 12 / 3 / 14 / 4; }
+.land33 { grid-area: 12 / 4 / 14 / 5; }
+.land34 { grid-area: 12 / 5 / 14 / 6; }
+.land35 { grid-area: 12 / 6 / 14 / 7; }
+.land36 { grid-area: 12 / 7 / 14 / 8; }
+.land37 { grid-area: 12 / 8 / 14 / 9; }
+.land38 { grid-area: 12 / 9 / 14 / 10; }
+.land39 { grid-area: 12 / 10 / 14 / 11; }
+.land40 { grid-area: 12 / 11 / 14 / 12; }
+
+.poke-card{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100% ;
+    position: relative;
+}
+
+.player{
+    position: absolute;
+    width: 25%;
+    height: 25%;
+}
+
+.rotate270{
+    transform:rotate(270deg);
+
+}
+.rotate90{
+    transform:rotate(90deg);
+    justify-self: flex-start;
+}
+
+@media (max-width:800px) {
+    .land{
+        font-size: .7rem;
+    }
+}
+@media (min-width:1000px) {
+    .land{
+        font-size: 1.1rem;
+    }
+}
+@media (max-height:800px) {
+    .land{
+        font-size: .8rem;
+        
+    }
+}
+@media (max-height:560px) {
+    .land{
+        font-size: .6rem;
+    }
 }

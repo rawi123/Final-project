@@ -11,14 +11,15 @@ import Homepage from "./components/homepage/HomePage";
 import Signup from "./components/login-signup/Signup";
 import Signin from "./components/login-signup/Signin";
 import Menu from "./components/Menu";
-
-// setImg1(`./sprites-animations/${pokes.name}-front.gif`)
-// {imgUrl1?<img src={require(`${imgUrl1}`).default}></img>:null}
-
+import WaitingRoom from "./components/waitingRoom/WaitingRoom";
+import socket from "./api/socket";
 function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    socket.on("connect",()=>{
+      console.log(socket.id)
+    })
     if (localStorage.getItem("token")) {
       dispatch(fetchUser())
     }// eslint-disable-next-line
@@ -32,9 +33,14 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<Signin />} />
         <Route path="/game" element={<Menu />} />
+        <Route path="/game-online" element={<WaitingRoom />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
+
+
+// setImg1(`./sprites-animations/${pokes.name}-front.gif`)
+// {imgUrl1?<img src={require(`${imgUrl1}`).default}></img>:null}

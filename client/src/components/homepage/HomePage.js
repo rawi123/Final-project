@@ -14,7 +14,7 @@ export default function HomePage() {
 
     const signGuest = async () => {
         try {
-            const user = await (login({ username: "Guest", password: "Guest" }));
+            const user = await (login({ username: "Guest", password: "Guest" }));// eslint-disable-next-line 
             if (!user) throw ("")
             dispatch(setUser({ user, decline: false }))
             navigate("/game")

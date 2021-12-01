@@ -1,0 +1,33 @@
+.waiting-room{
+    background: url("../../images/boardbackground.jpg")no-repeat center center/cover;
+    width: 100vw;
+    height: 100vh;
+}
+
+    
+
+.waiting-room .waiting-room-container{
+    width: 70%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin:0 auto;
+}
+.waiting-room .rooms{
+    background: burlywood;
+    opacity: 0.9;
+    min-height: 60vh;
+}
+
+.room-container{
+    background: burlywood;
+    width: 100%;
+    border-radius: 15px;
+    height: 60vh;
+}
+
+.send-message{
+    height: 40vh;
+    overflow: auto;
+}

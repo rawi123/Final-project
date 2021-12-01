@@ -4,24 +4,38 @@ import Button from '@mui/material/Button';
 import CasinoIcon from '@mui/icons-material/Casino';
 import { Link } from 'react-router-dom';
 import Nav from './Nav';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import StoreIcon from '@mui/icons-material/Store';
 import Store from './Store/Store';
 import BackpackIcon from '@mui/icons-material/Backpack';
 import BackPack from './Store/BackPack';
+import { setPokemons } from '../redux/slices/pokemonSlices';
+import { getPokemons } from '../api/pokemonApi';
 
 export default function Menu() {
-    const user = useSelector(state => state.user);
+    const user = useSelector(state => state?.user);
+    const {pokemons}=useSelector(state=>state?.pokemons)
+    const [store, setStore] = useState("none-absoulute");
+    const [backpack, setBackPack] = useState("none-absoulute");
+
+    const dispatch=useDispatch();
     const navigate = useNavigate();
-    const [store, setStore] = useState("noneAbsolute");
-    const [backpack, setBackPack] = useState("noneAbsolute");
 
     useEffect(() => {
         if (user && user.decline === true) {
             navigate("/")
         }// eslint-disable-next-line
     }, [user?.decline])
+
+    useEffect(() => {
+        if (!pokemons) {
+            (async () => {
+                const pokemons = await getPokemons();
+                dispatch(setPokemons({ pokemons }))
+            })()
+        }// eslint-disable-next-line 
+    }, [pokemons])
 
     const openStore = () => {
         setStore("store")

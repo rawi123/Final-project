@@ -30,7 +30,7 @@
     z-index: 10;
     animation: disappear .4s ease forwards;
 }
-.noneAbsolute{
+.none-absoulute{
     display: none;
 }
 @keyframes disappear {

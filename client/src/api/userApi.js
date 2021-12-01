@@ -6,7 +6,7 @@ import axios from 'axios';
 
 export const getUser = async () => {
     try {
-        const res = await fetchWithAuth('/user/me', "get");
+        const res = await fetchWithAuth('/user/me', {},"get");
         return res.data;
     }
     catch (err) {
@@ -58,7 +58,6 @@ export const buyPokemon = async (id) => {
 const fetchWithAuth = async (url, data, action) => {
     try {
         switch (action) {
-
             case "get": {
                 return await axios.get(`${process.env.REACT_APP_URL}${url}`, {
                     headers: {
