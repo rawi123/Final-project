@@ -13,6 +13,7 @@ import Signin from "./components/login-signup/Signin";
 import Menu from "./components/Menu";
 import WaitingRoom from "./components/waitingRoom/WaitingRoom";
 import socket from "./api/socket";
+import BoardContainer from "./components/game/BoardContainer";
 function App() {
   const dispatch = useDispatch();
 
@@ -33,7 +34,9 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<Signin />} />
         <Route path="/game" element={<Menu />} />
+        <Route path="/game-playing-online" element={<BoardContainer />} />
         <Route path="/game-online" element={<WaitingRoom />} />
+
       </Routes>
     </BrowserRouter>
   );

@@ -31,3 +31,12 @@
     height: 40vh;
     overflow: auto;
 }
+.button{
+    background: "#000000";
+    opacity: 0.9;
+    width:100%;
+    color: "white";
+}
+.button:hover{
+    background-color: '#5EC1F0';
+}

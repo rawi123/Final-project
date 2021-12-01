@@ -45,19 +45,34 @@ io.on("connection", socket => {
         io.emit('return-rooms', getRooms());
     })
 
-    socket.on("send-message", (message, room, user) => {
-        socket.broadcast.to(room).emit("recive-message", message, user,socket.id)
+    socket.on("start-game", (room) => {
+        io.sockets.adapter.rooms.get(room).add("playing");
+        console.log(io.sockets.adapter.rooms);
+        io.emit('return-rooms', getRooms());
+        io.to(room).emit("play-game");
+    })
+
+    socket.on("send-message", (message, room, user, allMessages) => {
+        allMessages = allMessages.map(val => {
+            val["direction"] = val["direction"] === "left" ? "right" : "left"
+            return val
+        })
+        socket.broadcast.to(room).emit("recive-message", message, user, socket.id, allMessages)
     })
 })
 
 
 const getRooms = () => {
     let arr = Array.from(io.sockets.adapter.rooms);
-    arr = arr.filter(val => val[0].slice(0, 4) === "room");
+    arr = arr.filter(val => val[0].slice(0, 4) === "room" &&
+        val[0].slice(arr[0].length - 7) !== "playing" &&
+        Array.from(val[1]).pop() !== "playing");
+
     arr = arr.map(val => {
         val[1] = Array.from(val[1]);
         return val
     })
+
     return arr
 }
 
