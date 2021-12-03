@@ -14,6 +14,9 @@ const currentPlayerSlices = createSlice({
         setCurrentPlayer: (state, action) => {
             state.currentPlayer = action.payload.currentPlayer
         },
+        setCurrentPlayerPos: (state, action) => {
+            state.currentPlayer.pos = action.payload.pos
+        },
     }
 
 })
@@ -21,5 +24,6 @@ const currentPlayerSlices = createSlice({
 
 //generate the action creators
 export const { setCurrentPlayer } = currentPlayerSlices.actions
+export const { setCurrentPlayerPos } = currentPlayerSlices.actions
 //export reducers
 export default currentPlayerSlices.reducer;

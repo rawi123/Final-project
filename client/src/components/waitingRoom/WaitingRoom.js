@@ -93,7 +93,7 @@ export default function WaitingRoom() {
                                     <StyledTableCell component="th" scope="row">
                                         {room[0]}
                                     </StyledTableCell>
-                                    <StyledTableCell align="right">{room[1].length}/3</StyledTableCell>
+                                    <StyledTableCell align="right">{room[1].length}/4</StyledTableCell>
                                     <StyledTableCell align="right"><Button onClick={() => joinRoom(room[0])} variant="contained" sx={{ background: "#000000", opacity: 0.9, '&:hover': { backgroundColor: '#5EC1F0' } }}>Join</Button></StyledTableCell>
                                 </StyledTableRow>
                             ))}

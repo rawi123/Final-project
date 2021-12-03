@@ -9,6 +9,8 @@ import PokemonLand from "./PokemonLand"
 import JailLand from './JailLand'
 import TaxPrize from './TaxPrize'
 import "../../images/player-black.png"
+
+
 export default function Board() {
     const { pokemons } = useSelector(state => state?.pokemons);
     const { players } = useSelector(state => state?.players);
@@ -27,6 +29,7 @@ export default function Board() {
             setCards(arr);
         }
     }, [pokemons])
+    
 
     return (
         <div className="board">

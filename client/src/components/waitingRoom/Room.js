@@ -20,7 +20,7 @@ export default function Room({ roomProp, setTableClass }) {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const { user } = useSelector(state => state?.user);
-    const [images]=useState(['black','blue','yellow']);
+    const [images] = useState(['black', 'blue', 'yellow']);
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -35,23 +35,21 @@ export default function Room({ roomProp, setTableClass }) {
                 return
             setMessages([...allMessages, { message, direction: "left", sender: user }]);
         })
-        console.log(socket.id)
 
 
 
         socket.on("play-game", (roomData) => {
+            
             roomData.map((val, i) => {
-                const player = {number:i, img:images[i], pos:1, socketId:socket.id, pokemons:[], ownedLands:[],money:3000};
+                const player = { number: i, img: images[i], pos: 0, socketId: val, pokemons: [], ownedLands: [], money: 3000 };
                 if (socket.id === val) {
                     player.pokemons = user.pokemons;
                     dispatch(setCurrentPlayer({ currentPlayer: player }));
                 }
-                dispatch(addPlayer({player}))
-
+                dispatch(addPlayer({ player }))
             })
             navigate("/game-playing-online");
         })
-
     }, [])
 
     const sendMessage = () => {
@@ -75,7 +73,7 @@ export default function Room({ roomProp, setTableClass }) {
         <>
             <div className="flex center column">
                 <h2 >{room[0]}</h2>
-                <h2 >{room[1].length}/3</h2>
+                <h2 >{room[1].length}/4</h2>
             </div>
             <Button onClick={leaveRoom} variant="contained" sx={{ background: "#000000", position: "absolute", width: "100%", bottom: "0", '&:hover': { backgroundColor: '#5EC1F0' } }}>Leave Room</Button>
             <Grid>
