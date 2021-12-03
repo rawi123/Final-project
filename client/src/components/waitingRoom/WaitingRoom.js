@@ -44,6 +44,7 @@ export default function WaitingRoom() {
         socket.on("return-rooms", (rooms) => {
             setRooms(rooms)
         })
+
     }, [])
 
     const createRoom = async () => {
@@ -77,7 +78,7 @@ export default function WaitingRoom() {
                     <Room roomProp={currentRoom} setTableClass={setTableClass} />
                 </div> : null}
                 <TableContainer className={`relative ${tableClass}`} component={Paper}>
-                    <Table sx={{ minWidth: 700 }} aria-label="customized table" className="rooms">
+                    <Table sx={{ minWidth: 700 }} aria-label="customized table" className="rooms waiting-table">
                         <TableHead>
                             <TableRow>
                                 <StyledTableCell>Room</StyledTableCell>
@@ -86,7 +87,7 @@ export default function WaitingRoom() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {rooms.map((room) => (
+                            {rooms.map((room) => (//room[0] is room name room[1] is the players array
 
                                 <StyledTableRow key={room[0]}>
                                     <StyledTableCell component="th" scope="row">

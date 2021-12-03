@@ -11,15 +11,19 @@ import Fab from '@material-ui/core/Fab';
 import SendIcon from '@mui/icons-material/Send';
 import { useSelector } from "react-redux";
 import { useNavigate } from 'react-router';
-
+import { useDispatch } from 'react-redux';
+import { setCurrentPlayer } from "../../redux/slices/currentPlayerSlices"
+import { addPlayer } from "../../redux/slices/playersSlices";
 
 export default function Room({ roomProp, setTableClass }) {
     const [room, setRoom] = useState(roomProp)
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const { user } = useSelector(state => state?.user);
+    const [images]=useState(['black','blue','yellow']);
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const divRef = useRef(null);
 
     useEffect(() => {
@@ -31,12 +35,24 @@ export default function Room({ roomProp, setTableClass }) {
                 return
             setMessages([...allMessages, { message, direction: "left", sender: user }]);
         })
-        socket.on("play-game",()=>{
-            sessionStorage.setItem("room",room[0])
-            navigate("/game-playing-online")
-        })
-    }, [])
+        console.log(socket.id)
 
+
+
+        socket.on("play-game", (roomData) => {
+            roomData.map((val, i) => {
+                const player = {number:i, img:images[i], pos:1, socketId:socket.id, pokemons:[], ownedLands:[],money:3000};
+                if (socket.id === val) {
+                    player.pokemons = user.pokemons;
+                    dispatch(setCurrentPlayer({ currentPlayer: player }));
+                }
+                dispatch(addPlayer({player}))
+
+            })
+            navigate("/game-playing-online");
+        })
+
+    }, [])
 
     const sendMessage = () => {
         if (input === "") return
@@ -51,8 +67,8 @@ export default function Room({ roomProp, setTableClass }) {
         setTableClass("");
     }
 
-    const startGame=()=>{
-        socket.emit("start-game",room[0])
+    const startGame = () => {
+        socket.emit("start-game", room[0])
     }
 
     return (
@@ -83,7 +99,7 @@ export default function Room({ roomProp, setTableClass }) {
                     </Grid>
                 </Grid>
             </Grid>
-            {socket.id === room[1][0] ? <Button onClick={startGame} variant="contained" style={{ background: "#000000",width:"100%", opacity: 0.9, color: "white" }}>Play</Button> : null}
+            {socket.id === room[1][0] ? <Button onClick={startGame} variant="contained" style={{ background: "#000000", width: "100%", opacity: 0.9, color: "white" }}>Play</Button> : null}
 
         </>
     )

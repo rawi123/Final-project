@@ -1,17 +1,13 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import PokeCard from './PokeCard'
 import "./style.css"
-import { getPokemons } from "../../api/pokemonApi"
-import { useDispatch, useSelector } from 'react-redux'
-import { setPokemons } from '../../redux/slices/pokemonSlices'
+import { useSelector } from 'react-redux'
 import CloseIcon from '@mui/icons-material/Close';
 import Grid from '@mui/material/Grid';
 
 export default function Store({ classToPut, setStore }) {
-    const dispatch = useDispatch();
     const { pokemons } = useSelector(state => state?.pokemons);
     const { user } = useSelector(state => state?.user);
-
 
     const closeStore = () => {
         setStore("none")

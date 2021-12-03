@@ -46,10 +46,12 @@ io.on("connection", socket => {
     })
 
     socket.on("start-game", (room) => {
-        io.sockets.adapter.rooms.get(room).add("playing");
-        console.log(io.sockets.adapter.rooms);
-        io.emit('return-rooms', getRooms());
-        io.to(room).emit("play-game");
+        const roomData=io.sockets.adapter.rooms.get(room);
+        // if (roomData.size >= 2) {
+            io.emit('return-rooms', getRooms());
+            io.to(room).emit("play-game",[...roomData]);
+            roomData.add("playing");
+        // }
     })
 
     socket.on("send-message", (message, room, user, allMessages) => {
@@ -58,6 +60,10 @@ io.on("connection", socket => {
             return val
         })
         socket.broadcast.to(room).emit("recive-message", message, user, socket.id, allMessages)
+    })
+
+    socket.on("socket-room", (cb) => {
+        cb(Array.from(socket.rooms));
     })
 })
 
@@ -81,4 +87,9 @@ const leaveLastRoom = (socket) => {
         const lastValue = Array.from(socket.rooms).pop();
         socket.leave(lastValue)
     }
+}
+
+const emitPlayers=(roomData)=>{
+    
+
 }
