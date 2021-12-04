@@ -11,10 +11,8 @@ import TaxPrize from './TaxPrize'
 import "../../images/player-black.png"
 
 
-export default function Board() {
+export default function Board({ cards, setCards }) {
     const { pokemons } = useSelector(state => state?.pokemons);
-    const { players } = useSelector(state => state?.players);
-    const [cards, setCards] = useState([]);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -24,12 +22,13 @@ export default function Board() {
                 dispatch(setPokemons({ pokemons }))
             })()
         }
-        if (pokemons !== null) {
+
+        else {
             const arr = ["go", pokemons[0], pokemons[1], pokemons[2], "tax", pokemons[3], pokemons[4], pokemons[5], "prize", "card", "store", pokemons[6], pokemons[7], pokemons[8], "prize", pokemons[9], "tax", pokemons[10], pokemons[11], "card", "jail", pokemons[12], pokemons[13], pokemons[14], "card", pokemons[15], pokemons[16], "tax", "card", pokemons[17], "store", "tax", "prize", pokemons[18], pokemons[19], pokemons[20], "card", pokemons[21], pokemons[22], pokemons[23]];
             setCards(arr);
         }
     }, [pokemons])
-    
+
 
     return (
         <div className="board">
@@ -40,7 +39,6 @@ export default function Board() {
                 }
                 if (cards[i] === "tax" || cards[i] === "prize") {
                     return <Land key={i} classGive={`land${i + 1}`} cardNumber={i} children={<TaxPrize card={cards[i]} />} />
-
                 }
                 if (cards[i] === "store") {
                     return <Land key={i} classGive={`land${i + 1}`} cardNumber={i} children={<StoreLand card={cards[i]} />} />
