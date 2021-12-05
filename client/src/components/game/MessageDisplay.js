@@ -1,65 +1,19 @@
 import React, { useState } from 'react'
 // import image from "../../sprites-animations"
-export default function MessageDisplay({ card }) {
-    // console.log(card.card);
-    // if (typeof card.card === "object") {
-    //     return (
-    //         <div className={`${card ? "message-card background-no-fill" : "message-card-hide"}`}>
-    //             <img src={require(`../../sprites-animations/${card.card.name}-front.gif`).default} ></img>
-    //         </div>
-    //     )
-    // }
-    if (card.card === "prize") {
-        return (
-            <div className={`${card ? "message-card" : "message-card-hide"}`}>
-                <h2>Your lucky! the goverment felt nice</h2>
-                <h2>You won {card.sum}$</h2>
-            </div>
-        )
-    }
-    if (card.card === "tax") {
-        <div className={`${card ? "message-card" : "message-card-hide"}`}>
-            <h2>Tax cover: you have to pay {card.sum}$</h2>
-        </div>
-    }
-    if (card.card === "go") {
-        return (
-            <div className={`${card ? "message-card" : "message-card-hide"}`}>
-                <h2>You got Paid 2000$</h2>
-            </div>
-        )
-    }
-    if (card.card === "card") {
-        if (card.rnd === 10) {
-            return (
-                <div className={`${card ? "message-card" : "message-card-hide"}`}>
-                    <h2>You Won a mysterious Pokemon!</h2>
-                </div>
-            )
-        }
-        if (card.rnd <= 5) {
-            return (
-                <div className={`${card ? "message-card" : "message-card-hide"}`}>
-                    <h2>You got robbed for {card.sum}$</h2>
-                </div>
-            )
-        }
-        return (
-            <div className={`${card ? "message-card" : "message-card-hide"}`}>
-                <h2>A mysterious man paid you {card.sum}$ </h2>
-            </div>
-        )
-    }
-    if (card.card === "jail") {
-        return (
-            <div className={`${card ? "message-card" : "message-card-hide"}`}>
-                <h2> Jailed! you are susspended for 1 round! </h2>
-            </div>
-        )
-    }
+export default function MessageDisplay({ card,turn,currentPlayer }) {
+
+
     return (
         <>
-
+            {(card.card &&card.card!=="store" && typeof (card.card) !== "object") ? <div className={`${card ? "message-card" : "message-card-hide"}`}>
+                <h2>
+                    {card.card === "prize" ? `${turn=== currentPlayer.number ? "you" : `player ${turn+1} is`} lucky! the goverment felt nice. ${turn=== currentPlayer.number ? "you" : `player ${turn+1}`} won ${card.sum}$` :
+                        card.card === "tax" ? `Tax cover: ${turn=== currentPlayer.number ? "you" : `player ${turn+1}`} have to pay ${card.sum}$` :
+                            card.card === "go" ? `${turn=== currentPlayer.number ? "you" : `player ${turn+1}`} got Paid 2000$` :
+                                card.card === "card" ? card.rnd === 10 ? `${turn=== currentPlayer.number ? "you" : `player ${turn+1}`} Won a mysterious Pokemon!` : card.rnd <= 5 ? `${turn=== currentPlayer.number ? "you" : `player ${turn+1}`} got robbed for ${card.sum}$` : `A mysterious man paid ${turn=== currentPlayer.number ? "you" : `player ${turn+1}`} ${card.sum}$` :
+                                    card.card === "jail" ? `jailed for one round!` : null}
+                </h2>
+            </div> : null}
         </>
     )
 }

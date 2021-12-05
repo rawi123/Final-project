@@ -11,12 +11,12 @@ import Alert from '@mui/material/Alert';
 import { buyPokemon } from '../../api/userApi';
 import { setUser } from "../../redux/slices/userSlices"
 
-export default function PokeCard({ pokemon, removeBuy }) {
+export default function PokeCard({ pokemon, removeBuy, userProp, handelBuyProp }) {
     const { user } = useSelector(state => state?.user);
     const dispatch = useDispatch();
     const [err, setErr] = useState(false);
     const [enableBuy, setEnableBuy] = useState(true);
-    
+
     const error = () => {
         setErr(true);
         setTimeout(() => {
@@ -65,7 +65,7 @@ export default function PokeCard({ pokemon, removeBuy }) {
                     </Typography>
                 </CardContent>
                 <CardActions>
-                    {pokemon.cost}${!removeBuy ? <Button size="small" onClick={handelBuy}>Buy</Button> : null}
+                    {pokemon.cost}${!removeBuy ? <Button size="small" onClick={()=>handelBuyProp?handelBuyProp(pokemon,error):handelBuy()}>Buy</Button> : null}
                 </CardActions>
             </Card>
             {err ? <Alert sx={{ mt: 3 }} severity="error">Not enough money</Alert> : null}

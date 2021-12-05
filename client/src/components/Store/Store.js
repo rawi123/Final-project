@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 import CloseIcon from '@mui/icons-material/Close';
 import Grid from '@mui/material/Grid';
 
-export default function Store({ classToPut, setStore }) {
+export default function Store({ classToPut, setStore, userProp,handelBuyProp }) {
     const { pokemons } = useSelector(state => state?.pokemons);
     const { user } = useSelector(state => state?.user);
 
@@ -20,8 +20,10 @@ export default function Store({ classToPut, setStore }) {
             <div className="store-items">
                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {pokemons ?
-                        pokemons.filter(val => user?.pokemons.every(ownVal => ownVal._id !== val._id))
-                            .map(pokemon => <PokeCard key={pokemon._id} pokemon={pokemon} />)
+                        userProp ? pokemons.filter(val => userProp.pokemons.every(ownVal => ownVal._id !== val._id))
+                            .map(pokemon => <PokeCard handelBuyProp={handelBuyProp} userProp={userProp} key={pokemon._id} pokemon={pokemon} />) :
+                            pokemons.filter(val => user?.pokemons.every(ownVal => ownVal._id !== val._id))
+                                .map(pokemon => <PokeCard key={pokemon._id} pokemon={pokemon} />)
                         : null}
                 </Grid>
             </div>

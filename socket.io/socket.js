@@ -39,8 +39,6 @@ io.on("connection", socket => {
             io.to(room).emit("roomUpdate", [room, joinedPeople]);
         }
         io.emit('return-rooms', getRooms());
-
-
     })
 
     socket.on("get-rooms", () => {
@@ -68,8 +66,8 @@ io.on("connection", socket => {
         cb(Array.from(socket.rooms));
     })
 
-    socket.on("player-move", (oldPos, sum, turn) => {
-        io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn)
+    socket.on("player-move", (oldPos, sum, turn,cards,players,updatedPlayers) => {
+        io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn,cards,players,updatedPlayers)
     })
 })
 
@@ -93,9 +91,4 @@ const leaveLastRoom = (socket) => {
         const lastValue = Array.from(socket.rooms).pop();
         socket.leave(lastValue)
     }
-}
-
-const emitPlayers = (roomData) => {
-
-
 }

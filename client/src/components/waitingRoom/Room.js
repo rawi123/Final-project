@@ -46,7 +46,8 @@ export default function Room({ roomProp, setTableClass }) {
     }
 
     const startGame = () => {
-        socket.emit("start-game", room[0])
+        // if (room[1].length >= 2)
+            socket.emit("start-game", room[0])
     }
 
     return (
@@ -56,7 +57,7 @@ export default function Room({ roomProp, setTableClass }) {
                 <h2 >{room[1].length}/4</h2>
             </div>
             <Button onClick={leaveRoom} variant="contained" sx={{ background: "#000000", position: "absolute", width: "100%", bottom: "0", '&:hover': { backgroundColor: '#5EC1F0' } }}>Leave Room</Button>
-            <Grid>
+            <Grid className="message-room">
                 <List ref={divRef} className="send-message" sx={{ height: "80%" }}>
                     {messages.map((val, i) => <ListItem key={i}>
                         <Grid container>
@@ -68,7 +69,7 @@ export default function Room({ roomProp, setTableClass }) {
                     </ListItem>)}
                 </List>
                 <Divider />
-                <Grid container style={{ padding: '20px', position: "sticky", bottom: "130px" }}>
+                <Grid container className="message-row">
                     <Grid item xs={11}>
                         <TextField onKeyDown={(e) => { if (e.code === "Enter") sendMessage() }} id="outlined-basic-email" label="Type Something" value={input} fullWidth onChange={(e) => setInput(e.target.value)} />
                     </Grid>

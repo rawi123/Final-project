@@ -43,7 +43,6 @@ export default function WaitingRoom() {
     const [rooms, setRooms] = React.useState([]);
     const [tableClass, setTableClass] = React.useState("");
     const [currentRoom, setCurrentRoom] = React.useState("");
-    const [images] = React.useState(['black', 'blue', 'yellow']);
     const { user } = useSelector(state => state.user);
 
     const navigate = useNavigate();
@@ -59,8 +58,7 @@ export default function WaitingRoom() {
 
         socket.on("play-game", (roomData) => {
             roomData.map((val, i) => {
-                const player = { number: i, img: images[i], pos: 0, socketId: val, pokemons: [], ownedLands: [], money: 3000, jail: false };
-                console.log(user)
+                const player = { number: i, pos: 0, socketId: val, pokemons: [], ownedLands: [], money: 13000, jail: false };
                 if (socket.id === val) {
                     player.pokemons = user.pokemons;
                     dispatch(setCurrentPlayer({ currentPlayer: player }));

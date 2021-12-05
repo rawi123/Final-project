@@ -16,7 +16,7 @@ export const updatePlayerPos = (players, turn, i, oldPos) => {
 export const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const playTurn = (players, turn, newPos, cards, pokemons) => {
-    const moneyTakeOut = Math.floor(Math.random() * (2001 - 500) + 500);
+    let moneyTakeOut = Math.floor(Math.random() * (2001 - 500) + 500);
     const playerCurrent = { ...players[turn] };
     const avilablePokemons = playerCurrent.pokemons.length === 24 ? [] : returnAvilablePokemons(playerCurrent, pokemons);
     const rnd = avilablePokemons.length > 0 ? Math.floor(Math.random() * 10 + 1) : Math.floor(Math.random() * 9 + 1);
@@ -35,8 +35,10 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
         playerCurrent.money += moneyTakeOut;
 
     else if (cards[newPos] === "card") {
-        if (rnd <= 5)
-            playerCurrent.money -= moneyTakeOut
+        if (rnd <= 5) {
+            moneyTakeOut = (moneyTakeOut * 0.8).toFixed(2);
+            playerCurrent.money -= moneyTakeOut;
+        }
 
         else if (rnd <= 9)
             playerCurrent.money += moneyTakeOut
@@ -46,7 +48,6 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
 
     }
     else if (cards[newPos] === "Jail") {
-        canPlayFlag = true;
         console.log("jail")
     }
 
@@ -54,9 +55,9 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
         canPlayFlag = true;
         console.log("store")
     }
-
+    playerCurrent.pos = newPos;
     players[turn] = playerCurrent;
-    return { canPlayFlag, players, card: cards[newPos], moneyTakeOut,rnd };
+    return { canPlayFlag, players, card: cards[newPos], moneyTakeOut, rnd };
 }
 
 export const returnAvilablePokemons = (currentPlayer, pokemons) => {
