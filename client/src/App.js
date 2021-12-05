@@ -14,12 +14,14 @@ import Menu from "./components/Menu";
 import WaitingRoom from "./components/waitingRoom/WaitingRoom";
 import socket from "./api/socket";
 import BoardContainer from "./components/game/BoardContainer";
+import {setSocketEnabled} from "./redux/slices/socketRunSlices";
+
 function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     socket.on("connect",()=>{
-      console.log(socket.id)
+      dispatch(setSocketEnabled(true))
     })
     if (localStorage.getItem("token")) {
       dispatch(fetchUser())

@@ -10,20 +10,14 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Fab from '@material-ui/core/Fab';
 import SendIcon from '@mui/icons-material/Send';
 import { useSelector } from "react-redux";
-import { useNavigate } from 'react-router';
-import { useDispatch } from 'react-redux';
-import { setCurrentPlayer } from "../../redux/slices/currentPlayerSlices"
-import { addPlayer } from "../../redux/slices/playersSlices";
+
 
 export default function Room({ roomProp, setTableClass }) {
     const [room, setRoom] = useState(roomProp)
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const { user } = useSelector(state => state?.user);
-    const [images] = useState(['black', 'blue', 'yellow']);
 
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
     const divRef = useRef(null);
 
     useEffect(() => {
@@ -36,20 +30,6 @@ export default function Room({ roomProp, setTableClass }) {
             setMessages([...allMessages, { message, direction: "left", sender: user }]);
         })
 
-
-
-        socket.on("play-game", (roomData) => {
-            
-            roomData.map((val, i) => {
-                const player = { number: i, img: images[i], pos: 0, socketId: val, pokemons: [], ownedLands: [], money: 3000 };
-                if (socket.id === val) {
-                    player.pokemons = user.pokemons;
-                    dispatch(setCurrentPlayer({ currentPlayer: player }));
-                }
-                dispatch(addPlayer({ player }))
-            })
-            navigate("/game-playing-online");
-        })
     }, [])
 
     const sendMessage = () => {
@@ -61,7 +41,7 @@ export default function Room({ roomProp, setTableClass }) {
     }
 
     const leaveRoom = () => {
-        socket.emit("leave-room", room[0])
+        socket.emit("leave-room", room[0]);
         setTableClass("");
     }
 
@@ -92,7 +72,7 @@ export default function Room({ roomProp, setTableClass }) {
                     <Grid item xs={11}>
                         <TextField onKeyDown={(e) => { if (e.code === "Enter") sendMessage() }} id="outlined-basic-email" label="Type Something" value={input} fullWidth onChange={(e) => setInput(e.target.value)} />
                     </Grid>
-                    <Grid xs={1} align="right">
+                    <Grid item xs={1} align="right">
                         <Fab onClick={sendMessage} color="primary" aria-label="add"><SendIcon /></Fab>
                     </Grid>
                 </Grid>

@@ -7,6 +7,8 @@ const io = require("socket.io")(process.env.PORT || 5000, {
 let latestRoom = 1;
 
 io.on("connection", socket => {
+
+
     socket.on('create', (callback) => {
         const room = "room" + latestRoom
         socket.join(room)
@@ -46,13 +48,11 @@ io.on("connection", socket => {
     })
 
     socket.on("start-game", (room) => {
-        console.log(io.sockets.adapter.rooms.get(room));
-        console.log(socket.rooms);
-        const roomData=io.sockets.adapter.rooms.get(room);
+        const roomData = io.sockets.adapter.rooms.get(room);
         // if (roomData.size >= 2) {
-            io.emit('return-rooms', getRooms());
-            io.to(room).emit("play-game",[...roomData]);
-            roomData.add("playing");
+        io.emit('return-rooms', getRooms());
+        io.to(room).emit("play-game", [...roomData]);
+        roomData.add("playing");
         // }
     })
 
@@ -66,6 +66,10 @@ io.on("connection", socket => {
 
     socket.on("socket-room", (cb) => {
         cb(Array.from(socket.rooms));
+    })
+
+    socket.on("player-move", (oldPos, sum, turn) => {
+        io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn)
     })
 })
 
@@ -91,7 +95,7 @@ const leaveLastRoom = (socket) => {
     }
 }
 
-const emitPlayers=(roomData)=>{
-    
+const emitPlayers = (roomData) => {
+
 
 }

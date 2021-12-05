@@ -11,6 +11,11 @@ import "./style.css"
 import { Button } from '@mui/material';
 import socket from "../../api/socket";
 import Room from './Room';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
+import { setCurrentPlayer } from "../../redux/slices/currentPlayerSlices"
+import { addPlayer } from "../../redux/slices/playersSlices";
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -38,13 +43,32 @@ export default function WaitingRoom() {
     const [rooms, setRooms] = React.useState([]);
     const [tableClass, setTableClass] = React.useState("");
     const [currentRoom, setCurrentRoom] = React.useState("");
+    const [images] = React.useState(['black', 'blue', 'yellow']);
+    const { user } = useSelector(state => state.user);
 
+    const navigate = useNavigate();
+
+    const dispatch = useDispatch();
     React.useEffect(() => {
+
         socket.emit("get-rooms");
         socket.on("return-rooms", (rooms) => {
             setRooms(rooms)
         })
 
+
+        socket.on("play-game", (roomData) => {
+            roomData.map((val, i) => {
+                const player = { number: i, img: images[i], pos: 0, socketId: val, pokemons: [], ownedLands: [], money: 3000, jail: false };
+                console.log(user)
+                if (socket.id === val) {
+                    player.pokemons = user.pokemons;
+                    dispatch(setCurrentPlayer({ currentPlayer: player }));
+                }
+                dispatch(addPlayer({ player }))
+            })
+            navigate("/game-playing-online");
+        })
     }, [])
 
     const createRoom = async () => {

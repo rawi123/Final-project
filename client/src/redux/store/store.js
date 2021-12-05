@@ -4,6 +4,7 @@ import pokemonsReducer from "../slices/pokemonSlices";
 import playersReducer from "../slices/playersSlices";
 import turnReducer from "../slices/turnSlices";
 import playReducer from "../slices/playSlices";
+import socketEnabledReducer from "../slices/socketRunSlices";
 import currentPlayerReducer from "../slices/currentPlayerSlices";
 
 const store = configureStore({
@@ -13,7 +14,8 @@ const store = configureStore({
         players: playersReducer,
         currentPlayer:currentPlayerReducer,
         turn:turnReducer,
-        play:playReducer
+        play:playReducer,
+        socketEnabled:socketEnabledReducer,
         // ingameUser:ingameUserReducer
     },
 })
