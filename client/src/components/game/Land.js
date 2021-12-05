@@ -17,7 +17,7 @@ export default function Land({ classGive, cardNumber, children }) {
                 {children}
                 {players?.map(val=>{
                     if(val.pos===cardNumber){
-                        return <img key={val.socketId} src={val.number===0?playerBlue:val.number===1?playerYellow:val.number===2?playerRed:playerGreen} 
+                        return <img alt="img" key={val.socketId} src={val.number===0?playerBlue:val.number===1?playerYellow:val.number===2?playerRed:playerGreen} 
                         className={`soldier player${val.number}`} style={{background:val.number===currentPlayer.number?"green":null}}></img>
                     }
                 })}

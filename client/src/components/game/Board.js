@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getPokemons } from '../../api/pokemonApi'
 import { setPokemons } from '../../redux/slices/pokemonSlices'
@@ -26,7 +26,7 @@ export default function Board({ cards, setCards }) {
         else {
             const arr = ["go", pokemons[0], pokemons[1], pokemons[2], "tax", pokemons[3], pokemons[4], pokemons[5], "prize", "card", "store", pokemons[6], pokemons[7], pokemons[8], "prize", pokemons[9], "tax", pokemons[10], pokemons[11], "card", "jail", pokemons[12], pokemons[13], pokemons[14], "card", pokemons[15], pokemons[16], "tax", "card", pokemons[17], "store", "tax", "prize", pokemons[18], pokemons[19], pokemons[20], "card", pokemons[21], pokemons[22], pokemons[23]];
             setCards(arr);
-        }
+        }// eslint-disable-next-line
     }, [pokemons])
 
 

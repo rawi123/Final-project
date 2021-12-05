@@ -8,7 +8,6 @@ export default class Dice extends Component {
     constructor(props) {
         super(props);
         this.state = { anotherRoll: false };
-
     }
     diceRolled = (rollSum, dicesArr) => {
         if (dicesArr[0] === dicesArr[1]) {

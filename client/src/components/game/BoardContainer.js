@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentPlayer } from "../../redux/slices/currentPlayerSlices";
 import { setPlayers } from "../../redux/slices/playersSlices";
 import { setPlay } from '../../redux/slices/playSlices';
+import { setTurn } from '../../redux/slices/turnSlices';
 import PlayersCards from './PlayersCards';
 import { Alert } from '@mui/material';
 import { checkTurnAdvance, wait, updatePlayerPos, playTurn } from './boradFunctionality/boardFunctionality';
@@ -24,6 +25,7 @@ export default function BoardContainer() {
         { pokemons } = useSelector(state => state.pokemons),
         [roll, setRoll] = useState(""),
         [cards, setCards] = useState([]),
+        [playerPlayingTurn,setPlayerPlayingTurn]=useState(),
         [currentCard, setCurrentCard] = useState({ card: "", sum: "", rnd: "" }),
         dispatch = useDispatch();
 
@@ -36,6 +38,7 @@ export default function BoardContainer() {
 
         if (socketEnabled) {
             socket.on("player-move", (oldPos, sum, turn, cards, players, updatedPlayers) => {
+                setPlayerPlayingTurn(turn);
                 if (turn !== currentPlayer.number) {
                     setRoll(sum);
                     setTimeout(() => {
@@ -44,14 +47,17 @@ export default function BoardContainer() {
                 }
                 walk(oldPos, sum, turn, cards, players, updatedPlayers);
             })
-        }
+            socket.on("next-turn", (turn, players) => {
+                dispatch(setTurn(turn))
+                dispatch(setPlayers({ players }))
+            })
+        }// eslint-disable-next-line
     }, [])
 
     const rolledDice = async (sum, dicesArr) => {
         const oldPos = currentPlayer.pos,
             newPos = (oldPos + sum) % 40,
             currentPlayerTemp = { ...currentPlayer, pos: newPos, money: (oldPos + sum) >= 40 ? currentPlayer.money + 2000 : currentPlayer.money };
-        // console.log(newPos);
         const updatedPlayers = playTurn([...players], turn, newPos, cards, pokemons);
         socket.emit("player-move", oldPos, sum, turn, cards, players, updatedPlayers);
 
@@ -63,7 +69,17 @@ export default function BoardContainer() {
         }
     }
 
-    const turnPlay = (updatedPlayers) => {
+    const walk = async (oldPos, sum, turn, cards, players, updatedPlayers) => {
+        let newPlayers;
+        for (let i = 1; i <= sum; i++) {
+            await wait(300);
+            newPlayers = updatePlayerPos(players, turn, i, oldPos);
+            dispatch(setPlayers({ players: newPlayers }));
+        }
+        turnPlay(updatedPlayers,turn);
+    }
+
+    const turnPlay = async (updatedPlayers,turn) => {
         const cardTemp = { card: updatedPlayers.card, sum: updatedPlayers.moneyTakeOut, rnd: updatedPlayers.rnd }
 
         setCurrentCard(cardTemp);
@@ -74,33 +90,26 @@ export default function BoardContainer() {
         }
 
         else {
-            dispatch(setCurrentPlayer({ currentPlayer: updatedPlayers.players[turn] }))
+            if (turn === currentPlayer.number)
+                dispatch(setCurrentPlayer({ currentPlayer: updatedPlayers.players[turn] }))
             dispatch(setPlayers({ players: updatedPlayers.players }));
+            endTurn([...updatedPlayers.players], false,turn);
+
         }
 
     }
 
 
-    const walk = async (oldPos, sum, turn, cards, players, updatedPlayers) => {
-        let newPlayers;
-        for (let i = 1; i <= sum; i++) {
-            // await wait(300);
-            newPlayers = updatePlayerPos(players, turn, i, oldPos);
-            dispatch(setPlayers({ players: newPlayers }));
-        }
-        turnPlay(updatedPlayers);
-    }
-
-    const endTurn = (updatedCurrent = false) => {
-        const playersTemp = [...players];
-        if (updatedCurrent) {
-            playersTemp[turn] = currentPlayer;
+    const endTurn = async(playersTemp, currentPlayer = false,turnProp) => {
+        dispatch(setPlay(false));
+        if (!playersTemp) {
+            playersTemp = [...players];
+            playersTemp[turnProp] = currentPlayer;
             dispatch(setPlayers({ players: playersTemp }));
-            //turn ++;
         }
-        else {
-            //turn++;
-        }
+        console.log(turn,turnProp,"turn")
+        socket.emit("next-turn", turnProp, playersTemp);
+
     }
 
     return (
@@ -108,7 +117,7 @@ export default function BoardContainer() {
 
             <div className="board-container">
                 <Board cards={cards} setCards={setCards} />
-                <MessageDisplay turn={turn} currentPlayer={currentPlayer} card={currentCard}></MessageDisplay>
+                <MessageDisplay turn={playerPlayingTurn} currentPlayer={currentPlayer} card={currentCard}></MessageDisplay>
             </div>
             <div>
                 <div className="flex column">

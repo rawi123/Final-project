@@ -69,6 +69,19 @@ io.on("connection", socket => {
     socket.on("player-move", (oldPos, sum, turn,cards,players,updatedPlayers) => {
         io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn,cards,players,updatedPlayers)
     })
+    socket.on("next-turn",(turn,players)=>{
+        const roomPlayers=[...io.sockets.adapter.rooms.get([...socket.rooms][0])];
+
+        turn++;
+        console.log(turn,roomPlayers.length)
+        console.log(turn===roomPlayers.length-1)
+        if(turn===roomPlayers.length-1)
+            turn=0;
+      
+        console.log(turn)
+        io.to([...socket.rooms][0]).emit("next-turn",turn,players)
+        
+    })
 })
 
 

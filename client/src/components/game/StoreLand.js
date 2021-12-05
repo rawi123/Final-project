@@ -4,7 +4,7 @@ export default function StoreLand({ card }) {
     return (
         <>
             <p style={{position:"absolute"}}>Store</p>
-            <img className="full" src={store}></img>
+            <img alt="store" className="full" src={store}></img>
         </>
     )
 }

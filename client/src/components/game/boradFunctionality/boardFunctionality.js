@@ -36,7 +36,7 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
 
     else if (cards[newPos] === "card") {
         if (rnd <= 5) {
-            moneyTakeOut = (moneyTakeOut * 0.8).toFixed(2);
+            moneyTakeOut = parseInt(moneyTakeOut * 0.8);
             playerCurrent.money -= moneyTakeOut;
         }
 
@@ -44,7 +44,7 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
             playerCurrent.money += moneyTakeOut
 
         else if (rnd === 10)
-            playerCurrent.pokemons = [...playerCurrent.pokemons, avilablePokemons[Math.random() * avilablePokemons.length]];
+            playerCurrent.pokemons = [...playerCurrent.pokemons, avilablePokemons[Math.floor(Math.random() * avilablePokemons.length)]];
 
     }
     else if (cards[newPos] === "Jail") {

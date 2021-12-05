@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Button from '@mui/material/Button';
 import BackPack from '../Store/BackPack';
 import Store from '../Store/Store';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentPlayer } from '../../redux/slices/currentPlayerSlices';
 import LandDetails from './LandDetails';
 
@@ -10,8 +10,8 @@ export default function Play({ card, currentPlayer, endTurn }) {
     const [backpack, setBackPack] = useState("none-absoulute");
     const [store, setStore] = useState("store");
     const [land, setLand] = useState("");
+    const [currentState,setCurrentState]=useState(currentPlayer);
     const dispatch = useDispatch();
-    
 
     const handelBuy = (pokemon, error) => {
         const currentPlayerTemp = { ...currentPlayer };
@@ -20,6 +20,7 @@ export default function Play({ card, currentPlayer, endTurn }) {
             currentPlayerTemp.money -= pokemon.cost;
             currentPlayerTemp.pokemons = [...currentPlayerTemp.pokemons, pokemon];
             dispatch(setCurrentPlayer({ currentPlayer: currentPlayerTemp }));
+            setCurrentState(currentPlayerTemp)
         }
         else {
             error();
@@ -31,7 +32,7 @@ export default function Play({ card, currentPlayer, endTurn }) {
             <div className="flex column">
                 <Button onClick={() => setStore("store")}>Open Store</Button>
                 <Button onClick={() => setBackPack("store")}>Open Backpack</Button>
-                <Button onClick={() => endTurn(true)}>End turn</Button>
+                <Button onClick={() => endTurn(false,currentState)}>End turn</Button>
                 <BackPack userProp={currentPlayer} classToPut={backpack} setStore={setBackPack} />
                 <Store handelBuyProp={handelBuy} userProp={currentPlayer} classToPut={store} setStore={setStore} />
 
@@ -43,6 +44,7 @@ export default function Play({ card, currentPlayer, endTurn }) {
         return (
             <div className="flex column">
                 <Button onClick={() => setLand(land==="store"?"none":"store")}>Land details</Button>
+                <Button onClick={() => endTurn(false,currentState)}>End Turn</Button>
                 <LandDetails classToPut={land} pokemon={card.card}/>
             </div>
         )

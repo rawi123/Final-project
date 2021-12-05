@@ -3,7 +3,7 @@ import chance from "../../images/chance.jpg"
 export default function LuckyLand({ card }) {
     return (
         <>
-            <img src={chance} className="full"></img>
+            <img alt="chance" src={chance} className="full"></img>
         </>
     )
 }

@@ -12,7 +12,7 @@ const turnSlices = createSlice({
     reducers: {
 
         setTurn: (state, action) => {
-            state.turn = action.payload.tuen
+            state.turn = action.payload
         },
     }
 

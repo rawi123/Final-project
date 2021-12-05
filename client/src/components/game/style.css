@@ -168,13 +168,17 @@
 
 .land-details{
     position: absolute;
-    left: 35%;
-    top: 30%;
+    /* margin: 0 auto; */
+    left: calc(50% - 200px);
+    top: calc(50% - 200px);
     outline: 5px solid white;
     padding: .4rem;
     height: unset;
     width: unset;
     border: none;
+    min-width: 200px;
+    min-height: 200px;
+    
 }
 .land-purple{
     background: linear-gradient(90deg,rgb(156, 85, 156),rgb(56, 25, 78) ) !important;
@@ -194,6 +198,14 @@
 .land-blue{
     background: linear-gradient(125deg,blue,cyan ) !important;
 }
+.land-yellow strong{
+    color: black;
+    text-shadow: none;
+}
+strong{
+    text-shadow: black 2px 2px;
+}
+
 .land-red{
     background: linear-gradient(125deg,rgb(255, 0, 0),rgb(204, 132, 114) ) !important;
 }

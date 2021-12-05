@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 // import image from "../../sprites-animations"
 export default function MessageDisplay({ card,turn,currentPlayer }) {
 
