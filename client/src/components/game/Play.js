@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 import Button from '@mui/material/Button';
-import BackPack from '../Store/BackPack';
 import Store from '../Store/Store';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setCurrentPlayer } from '../../redux/slices/currentPlayerSlices';
 import LandDetails from './LandDetails';
 
 export default function Play({ card, currentPlayer, endTurn,turn }) {
-    const [backpack, setBackPack] = useState("none-absoulute");
+    
     const [store, setStore] = useState("store");
     const [land, setLand] = useState("");
     const [currentState,setCurrentState]=useState(currentPlayer);
@@ -31,9 +30,9 @@ export default function Play({ card, currentPlayer, endTurn,turn }) {
         return (
             <div className="flex column">
                 <Button onClick={() => setStore("store")}>Open Store</Button>
-                <Button onClick={() => setBackPack("store")}>Open Backpack</Button>
+                
                 <Button onClick={() => endTurn(false,currentState,turn)}>End turn</Button>
-                <BackPack userProp={currentPlayer} classToPut={backpack} setStore={setBackPack} />
+                
                 <Store handelBuyProp={handelBuy} userProp={currentPlayer} classToPut={store} setStore={setStore} />
 
             </div>

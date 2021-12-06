@@ -13,10 +13,11 @@ export default function BackPack({ classToPut, setStore,userProp }) {
     }
     
     return (
-        <div className={`flex column ${classToPut}`}>
+        <div className={`flex column ${classToPut} ${userProp?.pokemons.length===0?"pepe-sad":null}`} >
             <CloseIcon sx={{ cursor: "pointer" }} onClick={closeStore} />
-            <div className="flex center"><h2>My Pokemons</h2></div>
-            <div className="store-items">
+            <div className="card-header"><h2>My Pokemons</h2></div>
+            
+            <div className={`store-items  `}>
                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {userProp?userProp.pokemons.map(pokemon => <PokeCard key={pokemon._id + 1} removeBuy={true} pokemon={pokemon} />)
                     :user ? user.pokemons.map(pokemon => <PokeCard key={pokemon._id + 1} removeBuy={true} pokemon={pokemon} />) : null}

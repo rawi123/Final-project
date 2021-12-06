@@ -165,6 +165,10 @@
 .message-card-hide{
     animation:messageHide 1.5s ease-in-out forwards ;
 }
+.pepe-sad{
+    background: url(../../images/pepe\ the\ frog\ broke.jpg) no-repeat center center/cover;
+    
+}
 
 .land-details{
     position: absolute;

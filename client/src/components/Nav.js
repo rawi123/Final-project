@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from "../api/userApi";
 import { useNavigate } from 'react-router';
 import { setUser } from "../redux/slices/userSlices"
-
+import {Link} from "react-router-dom";
 export default function Nav() {
     const user = useSelector(state => state?.user);
     const dispatch = useDispatch();
@@ -46,6 +46,9 @@ export default function Nav() {
                     </Typography>
                     <Button color="inherit">
                         <img className="pokeball" src={pokeBall} alt="pokeball"></img>
+                    </Button>
+                    <Button component={Link} to="/game" color="inherit">
+                        Home
                     </Button>
                     <Button color="inherit" onClick={handelLogout}>
                         Log out

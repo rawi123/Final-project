@@ -6,7 +6,6 @@ import Divider from '@material-ui/core/Divider';
 import TextField from '@material-ui/core/TextField';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import Fab from '@material-ui/core/Fab';
 import SendIcon from '@mui/icons-material/Send';
 import { useDispatch, useSelector } from "react-redux";
@@ -34,15 +33,19 @@ export default function Room({ roomProp, setTableClass }) {
             })
         }
 
-
+        // eslint-disable-next-line
     }, [])
+
+    useEffect(() => {
+        divRef.current.scrollTop = divRef.current.scrollHeight;
+
+    })
 
     const sendMessage = () => {
         if (input === "") return
         socket.emit("send-message", { message: input, socket: socket.id, sender: user.username }, room[0]);
         setMessages([...messages,])
         setInput("");
-        divRef.current.scrollTop = divRef.current.scrollHeight;
     }
 
     const leaveRoom = () => {
@@ -57,7 +60,7 @@ export default function Room({ roomProp, setTableClass }) {
 
     return (
         <>
-            <div className="flex center column">
+            <div className="flex center column room-number">
                 <h2 >{room[0]}</h2>
                 <h2 >{room[1].length}/4</h2>
             </div>
@@ -65,12 +68,19 @@ export default function Room({ roomProp, setTableClass }) {
             <Grid className="message-room" >
                 <List ref={divRef} className="send-message" sx={{ height: "80%" }}>
                     {messages.map((val, i) => <ListItem key={i}>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <ListItemText align={val.socket===socket.id?"left":"right"} primary={val.message}></ListItemText>
-                                <ListItemText align={val.socket===socket.id?"left":"right"} primary={val.sender}></ListItemText>
-                            </Grid>
-                        </Grid>
+                        <article className={`msg-container  ${socket.id === val.socket ? "msg-self" : "msg-remote"}`} id="msg-0">
+                            <div className="msg-box">
+                                <div className="flr">
+                                    <div className="messages">
+                                        <p className="msg" id="msg-1">
+                                            {val.message}
+                                        </p>
+                                    </div>
+                                    <span className="timestamp"><span className="username">{val.sender}</span>&bull;</span>
+                                </div>
+                                <img alt="person img" className="user-img" id="user-0" src="//gravatar.com/avatar/56234674574535734573000000000001?d=retro" />
+                            </div>
+                        </article>
                     </ListItem>)}
                 </List>
                 <Divider />

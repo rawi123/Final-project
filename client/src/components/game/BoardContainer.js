@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentPlayer } from "../../redux/slices/currentPlayerSlices";
 import { setPlayers } from "../../redux/slices/playersSlices";
 import { setTurn } from '../../redux/slices/turnSlices';
+import { addActions } from "../../redux/slices/socketActionsSlices";
 import PlayersCards from './PlayersCards';
 import { Alert } from '@mui/material';
 import { wait, updatePlayerPos, playTurn, setFreeFromJail } from './boradFunctionality/boardFunctionality';
@@ -21,7 +22,8 @@ export default function BoardContainer() {
         { players } = useSelector(state => state.players),
         { socketEnabled } = useSelector(state => state.socketEnabled),
         { pokemons } = useSelector(state => state.pokemons),
-        [roll, setRoll] = useState(""),
+        { actions } = useSelector(state => state.socketActions),
+        [roll, setRoll] = useState([]),
         [cards, setCards] = useState([]),
         [playerPlayingTurn, setPlayerPlayingTurn] = useState(),
         [enablePlay, setEnablePlay] = useState(false),
@@ -36,49 +38,53 @@ export default function BoardContainer() {
             if (room[0].slice(0, 4) !== "room") {
                 navigate("/game")
             }
-        })
+        })// eslint-disable-next-line
+    }, [])
 
-        if (socketEnabled) {
-            socket.on("player-move", (oldPos, sum, turn, cards, players, updatedPlayers, diceArr) => {
-                if (turn === currentPlayer.number && currentPlayer.jail) {
-                    const jailFree = setFreeFromJail(players, currentPlayer);
-                    dispatch(setCurrentPlayer({ currentPlayer: jailFree.player }))
-                    dispatch(setPlayers({ players: jailFree.allPlayers }));
-                    socket.emit("next-turn", turn, jailFree.allPlayers);
+    useEffect(() => {
+        if (actions.length && socketEnabled && !actions.includes("player-move") && !actions.includes("next-turn")) {
+            socket.on("player-move", (oldPos, sum, turn, players, updatedPlayers, diceArr) => {
+                setDiceRoll(diceArr);
+                setPlayerPlayingTurn(turn);
+                if (turn !== currentPlayer.number) {
+                    setRoll(diceArr);
+                    setTimeout(() => {
+                        setRoll([])
+                    }, 4000);
                 }
-                else {
-                    setDiceRoll(diceArr);
-                    setPlayerPlayingTurn(turn);
-                    if (turn !== currentPlayer.number) {
-                        setRoll(sum);
-                        setTimeout(() => {
-                            setRoll("")
-                        }, 4000);
-                    }
-                    walk(oldPos, sum, turn, cards, players, updatedPlayers, diceArr);
-                }
+                walk(oldPos, sum, turn, players, updatedPlayers, diceArr);
             })
-            socket.on("next-turn", async (turn, players) => {
-                if (turn === currentPlayer.number) setEnableDice(true);
+            socket.on("next-turn", (turn, players) => {
+                if (turn === currentPlayer.number) {
+                    if (currentPlayer.jail === true) {
+                        const jailFree = setFreeFromJail(players, currentPlayer);
+                        dispatch(setCurrentPlayer({ currentPlayer: jailFree.player }))
+                        dispatch(setPlayers({ players: jailFree.allPlayers }));
+                        socket.emit("next-turn", turn, jailFree.allPlayers);
+                    }
+                    else setEnableDice(true);
+                }
                 dispatch(setTurn(turn))
                 dispatch(setPlayers({ players }))
             })
+            dispatch(addActions(["next-turn", "player-move"]))
         }// eslint-disable-next-line
-    }, [])
+    }, [actions])
 
     const rolledDice = async (sum, dicesArr) => {
         setEnableDice(false);
+        setEnablePlay(false);
+
         const oldPos = currentPlayer.pos,
             newPos = (oldPos + sum) % 40,
-            currentPlayerTemp = { ...currentPlayer, pos: newPos, money: (oldPos + sum) >= 40 ? currentPlayer.money + 2000 : currentPlayer.money };
-        const updatedPlayers = playTurn([...players], turn, newPos, cards, pokemons);
-        console.log(updatedPlayers.players);
-        socket.emit("player-move", oldPos, sum, turn, cards, players, updatedPlayers, dicesArr);
+            currentPlayerTemp = { ...currentPlayer, pos: newPos, money: (oldPos + sum) >= 40 ? currentPlayer.money + 2000 : currentPlayer.money },
+            updatedPlayers = playTurn([...players], turn, newPos, cards, pokemons);
 
+        socket.emit("player-move", oldPos, sum, turn, players, updatedPlayers, dicesArr);
         dispatch(setCurrentPlayer({ currentPlayer: currentPlayerTemp }));
     }
 
-    const walk = async (oldPos, sum, turn, cards, players, updatedPlayers, diceArr) => {
+    const walk = async (oldPos, sum, turn, players, updatedPlayers, diceArr) => {
         let newPlayers;
         for (let i = 1; i <= sum; i++) {
             await wait(300);
@@ -89,9 +95,8 @@ export default function BoardContainer() {
     }
 
     const turnPlay = async (updatedPlayers, turn, diceArr) => {
-        const cardTemp = { card: updatedPlayers.card, sum: updatedPlayers.moneyTakeOut, rnd: updatedPlayers.rnd }
-        setCurrentCard(cardTemp);
-        if (cardTemp.card !== "store" && typeof (cardTemp.card) !== "object") setTimeout(() => {
+        setCurrentCard(updatedPlayers);
+        if (updatedPlayers.card !== "store" && typeof (updatedPlayers.card) !== "object") setTimeout(() => {
             setCurrentCard({ card: "" })
         }, 4000);
 
@@ -101,17 +106,21 @@ export default function BoardContainer() {
         }
 
         else {
-            if (turn === currentPlayer.number)
-                dispatch(setCurrentPlayer({ currentPlayer: updatedPlayers.players[turn] }))
+
             dispatch(setPlayers({ players: updatedPlayers.players }));
-            endTurn([...updatedPlayers.players], false, turn, diceArr);
+            if (turn === currentPlayer.number) {
+                dispatch(setCurrentPlayer({ currentPlayer: updatedPlayers.players[turn] }))
+                await wait(3000);
+                endTurn([...updatedPlayers.players], false, turn, diceArr);
+            }
         }
 
     }
 
 
-    const endTurn = async (playersTemp, currentPlayer = false, turnProp, diceArr = false) => {
+    const endTurn = (playersTemp, currentPlayer = false, turnProp, diceArr = false) => {
         setEnablePlay(false);
+
         if (!playersTemp) {
             playersTemp = [...players];
             playersTemp[turnProp] = currentPlayer;
@@ -147,7 +156,7 @@ export default function BoardContainer() {
                     <Dice rolledDice={rolledDice} turn={turn} enableDice={enableDice} currentPlayerTurn={currentPlayer?.number}></Dice>
                 </div>
                 {enablePlay && currentPlayer.number === turn ? <Play endTurn={endTurn} turn={turn} currentPlayer={currentPlayer} card={currentCard}></Play> : null}
-                {roll ? <Alert sx={{ marginTop: "1rem" }} variant="outlined" severity="success" color="info" icon={false}>player rolled :{roll}</Alert> : null}
+                {roll.length ? <Alert sx={{ marginTop: "1rem" }} variant="outlined" severity="success" color="info" icon={false}>player rolled :{roll[0]},{roll[1]}</Alert> : null}
             </div>
 
             <PlayersCards currentPlayer={currentPlayer} players={players}></PlayersCards>

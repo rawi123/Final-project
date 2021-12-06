@@ -13,11 +13,15 @@ const socketActionSlices = createSlice({
         addAction: (state, action) => {
             state.actions = [...state.actions,action.payload];
         },
+        addActions:(state,action)=>{
+            state.actions = [...state.actions,...action.payload];
+        }
     }
 })
 
 
 //generate the action creators
 export const { addAction } = socketActionSlices.actions
+export const { addActions } = socketActionSlices.actions
 //export reducers
 export default socketActionSlices.reducer;

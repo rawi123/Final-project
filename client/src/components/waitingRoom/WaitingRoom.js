@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router';
 import { setCurrentPlayer } from "../../redux/slices/currentPlayerSlices"
 import { addPlayer } from "../../redux/slices/playersSlices";
 import { addAction } from '../../redux/slices/socketActionsSlices';
-
+import Nav from "../Nav";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -73,8 +73,8 @@ export default function WaitingRoom() {
                     return 1;
                 })
                 navigate("/game-playing-online");
-            })// eslint-disable-next-line
-        }
+            })
+        }// eslint-disable-next-line
     }, [user])
 
     const createRoom = async () => {
@@ -101,14 +101,15 @@ export default function WaitingRoom() {
         setTableClass("none-absoulute");
     }
 
-    return (
+    return (<>
+        <Nav></Nav>
         <div className="waiting-room">
             <div className="waiting-room-container flex column ">
                 {tableClass === "none-absoulute" ? <div className={`room-container relative`}>
                     <Room roomProp={currentRoom} setTableClass={setTableClass} />
                 </div> : null}
                 <TableContainer className={`relative ${tableClass}`} component={Paper}>
-                    <Table sx={{ minWidth: 700 }} aria-label="customized table" className="rooms waiting-table">
+                    <Table sx={{ minWidth: 400 }} aria-label="customized table" className="rooms waiting-table">
                         <TableHead>
                             <TableRow>
                                 <StyledTableCell>Room</StyledTableCell>
@@ -133,5 +134,6 @@ export default function WaitingRoom() {
                 </TableContainer>
             </div>
         </div>
+    </>
     );
 }

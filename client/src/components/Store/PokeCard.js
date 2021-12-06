@@ -44,7 +44,7 @@ export default function PokeCard({ pokemon, removeBuy, userProp, handelBuyProp }
 
     return (
         <Grid item xs={2} sm={4} md={4}>
-            <Card sx={{ maxWidth: 450, display: "flex", alignItems: "center", flexDirection: "column" }}>
+            <Card className="single-poke-card">
                 <img
                     height="100"
                     src={require(`../../sprites-animations/${pokemon.name}-front.gif`).default}
@@ -54,18 +54,19 @@ export default function PokeCard({ pokemon, removeBuy, userProp, handelBuyProp }
                     <Typography gutterBottom variant="h5" component="div">
                         {pokemon.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        attack:{pokemon.attack}
+                    <Typography variant="body2">
+                        <strong> attack:{pokemon.attack}</strong>
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        defense:{pokemon.def}
+                    <Typography variant="body2">
+                        <strong> defense:{pokemon.def}</strong>
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        hp:{pokemon.hp}
+                    <Typography variant="body2">
+                        <strong> hp:{pokemon.hp}</strong>
                     </Typography>
                 </CardContent>
                 <CardActions>
-                    {pokemon.cost}${!removeBuy ? <Button size="small" onClick={()=>handelBuyProp?handelBuyProp(pokemon,error):handelBuy()}>Buy</Button> : null}
+                    {pokemon.cost}${!removeBuy ? 
+                    <Button className="buy-button"  size="small" sx={{color:"black"}} onClick={() => handelBuyProp ? handelBuyProp(pokemon, error) : handelBuy()}>Buy</Button> : null}
                 </CardActions>
             </Card>
             {err ? <Alert sx={{ mt: 3 }} severity="error">Not enough money</Alert> : null}

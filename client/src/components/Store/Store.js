@@ -16,7 +16,7 @@ export default function Store({ classToPut, setStore, userProp,handelBuyProp }) 
     return (
         <div className={`flex column ${classToPut}`}>
             <CloseIcon sx={{ cursor: "pointer" }} onClick={closeStore} />
-            <div className="flex center"><h2>Poke Store</h2></div>
+            <div className="card-header"><h2>Poke Store</h2></div>
             <div className="store-items">
                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {pokemons ?
