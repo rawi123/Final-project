@@ -54,33 +54,24 @@ io.on("connection", socket => {
         // }
     })
 
-    socket.on("send-message", (message, room, user, allMessages) => {
-        allMessages = allMessages.map(val => {
-            val["direction"] = val["direction"] === "left" ? "right" : "left"
-            return val
-        })
-        socket.broadcast.to(room).emit("recive-message", message, user, socket.id, allMessages)
+    socket.on("send-message", (message, room) => {
+        socket.broadcast.to(room).emit("recive-message", message)
     })
 
     socket.on("socket-room", (cb) => {
         cb(Array.from(socket.rooms));
     })
 
-    socket.on("player-move", (oldPos, sum, turn,cards,players,updatedPlayers) => {
-        io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn,cards,players,updatedPlayers)
+    socket.on("player-move", (oldPos, sum, turn, cards, players, updatedPlayers,diceArr) => {
+        io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn, cards, players, updatedPlayers,diceArr)
     })
-    socket.on("next-turn",(turn,players)=>{
-        const roomPlayers=[...io.sockets.adapter.rooms.get([...socket.rooms][0])];
-
+    socket.on("next-turn", (turn, players) => {
+        const roomPlayers = [...io.sockets.adapter.rooms.get([...socket.rooms][0])];
         turn++;
-        console.log(turn,roomPlayers.length)
-        console.log(turn===roomPlayers.length-1)
-        if(turn===roomPlayers.length-1)
-            turn=0;
-      
-        console.log(turn)
-        io.to([...socket.rooms][0]).emit("next-turn",turn,players)
-        
+        if (turn === roomPlayers.length - 1)
+            turn = 0;
+        io.to([...socket.rooms][0]).emit("next-turn", turn, players)
+
     })
 })
 

@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentPlayer } from '../../redux/slices/currentPlayerSlices';
 import LandDetails from './LandDetails';
 
-export default function Play({ card, currentPlayer, endTurn }) {
+export default function Play({ card, currentPlayer, endTurn,turn }) {
     const [backpack, setBackPack] = useState("none-absoulute");
     const [store, setStore] = useState("store");
     const [land, setLand] = useState("");
@@ -32,7 +32,7 @@ export default function Play({ card, currentPlayer, endTurn }) {
             <div className="flex column">
                 <Button onClick={() => setStore("store")}>Open Store</Button>
                 <Button onClick={() => setBackPack("store")}>Open Backpack</Button>
-                <Button onClick={() => endTurn(false,currentState)}>End turn</Button>
+                <Button onClick={() => endTurn(false,currentState,turn)}>End turn</Button>
                 <BackPack userProp={currentPlayer} classToPut={backpack} setStore={setBackPack} />
                 <Store handelBuyProp={handelBuy} userProp={currentPlayer} classToPut={store} setStore={setStore} />
 
@@ -44,7 +44,7 @@ export default function Play({ card, currentPlayer, endTurn }) {
         return (
             <div className="flex column">
                 <Button onClick={() => setLand(land==="store"?"none":"store")}>Land details</Button>
-                <Button onClick={() => endTurn(false,currentState)}>End Turn</Button>
+                <Button onClick={() => endTurn(false,currentState,turn)}>End Turn</Button>
                 <LandDetails classToPut={land} pokemon={card.card}/>
             </div>
         )

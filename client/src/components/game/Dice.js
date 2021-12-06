@@ -31,7 +31,7 @@ export default class Dice extends Component {
                 rollTime={1}
                 defaultRoll={1}
             />
-            {this.props.turn === this.props.currentPlayerTurn ? <Button sx={{ color: "black", fontWeight: 700, border: "2px solid black" }} onClick={() => this.reactDice.rollAll()}>Roll</Button> : null}
+            {this.props.turn === this.props.currentPlayerTurn && this.props.enableDice ? <Button sx={{ color: "black", fontWeight: 700, border: "2px solid black" }} onClick={() => this.reactDice.rollAll()}>Roll</Button> : null}
             playing: {this.props.turn===this.props.currentPlayerTurn?"me":"player "+(Number(this.props.turn)+1)}
             {this.state.anotherRoll ? <Alert icon={false} variant="filled" severity="success">Another Roll!</Alert> : null}
         </>

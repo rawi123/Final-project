@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { setCurrentPlayer } from "../../redux/slices/currentPlayerSlices"
 import { addPlayer } from "../../redux/slices/playersSlices";
+import { addAction } from '../../redux/slices/socketActionsSlices';
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -43,9 +44,9 @@ export default function WaitingRoom() {
     const [rooms, setRooms] = React.useState([]);
     const [tableClass, setTableClass] = React.useState("");
     const [currentRoom, setCurrentRoom] = React.useState("");
-    const [images] = React.useState(['blue', 'yellow', 'red','green']);
+    const [images] = React.useState(['blue', 'yellow', 'red', 'green']);
     const { user } = useSelector(state => state.user);
-
+    const { actions } = useSelector(state => state.socketActions);
     const navigate = useNavigate();
 
     const dispatch = useDispatch();
@@ -56,20 +57,25 @@ export default function WaitingRoom() {
             setRooms(rooms)
         })
 
-
-        socket.on("play-game", (roomData) => {
-            roomData.map((val, i) => {
-                const player = { number: i, img: images[i], pos: 0, socketId: val, pokemons: [], ownedLands: [], money: 13000, jail: false };
-                if (socket.id === val) {
-                    player.pokemons = user.pokemons;
-                    dispatch(setCurrentPlayer({ currentPlayer: player }));
-                }
-                dispatch(addPlayer({ player }))
-                return 1;
-            })
-            navigate("/game-playing-online");
-        })// eslint-disable-next-line
     }, [])
+
+    React.useEffect(() => {
+        if (!actions.includes("play-game") && user) {
+            dispatch(addAction("play-game"));
+            socket.on("play-game", (roomData) => {
+                roomData.map((val, i) => {
+                    const player = { number: i, img: images[i], pos: 0, socketId: val, pokemons: [], ownedLands: [], money: 13000, jail: false };
+                    if (socket.id === val) {
+                        player.pokemons = user.pokemons;
+                        dispatch(setCurrentPlayer({ currentPlayer: player }));
+                    }
+                    dispatch(addPlayer({ player }))
+                    return 1;
+                })
+                navigate("/game-playing-online");
+            })// eslint-disable-next-line
+        }
+    }, [user])
 
     const createRoom = async () => {
         socket.emit("leave-last-room");

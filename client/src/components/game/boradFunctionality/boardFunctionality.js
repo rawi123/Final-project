@@ -1,11 +1,4 @@
-export const checkTurnAdvance = (diceArr) => {
-    if (diceArr[0] === diceArr[1]) {
-        return false
-    }
-    else {
-        return true;
-    }
-}
+
 
 export const updatePlayerPos = (players, turn, i, oldPos) => {
     const newPlayers = [...players];
@@ -24,7 +17,6 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
     let canPlayFlag = false;
 
     if (typeof cards[newPos] === "object") {
-        console.log("pokemon")
         canPlayFlag = true;
     }
 
@@ -47,13 +39,12 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
             playerCurrent.pokemons = [...playerCurrent.pokemons, avilablePokemons[Math.floor(Math.random() * avilablePokemons.length)]];
 
     }
-    else if (cards[newPos] === "Jail") {
-        console.log("jail")
+    else if (cards[newPos] === "jail") {
+        playerCurrent.jail = true;
     }
 
     else if (cards[newPos] === "store") {
         canPlayFlag = true;
-        console.log("store")
     }
     playerCurrent.pos = newPos;
     players[turn] = playerCurrent;
@@ -63,4 +54,12 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
 export const returnAvilablePokemons = (currentPlayer, pokemons) => {
     const avilablePokes = pokemons.filter(pokemon => currentPlayer.pokemons.every(val => val._id !== pokemon._id));
     return avilablePokes;
+}
+
+export const setFreeFromJail=(allPlayers,player)=>{
+    const allPlayersTemp=[...allPlayers];
+    const playerTemp={...player};
+    playerTemp.jail=false;
+    allPlayersTemp[player.number]=playerTemp;
+    return {allPlayers:allPlayersTemp,player:playerTemp}
 }

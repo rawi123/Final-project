@@ -7,11 +7,10 @@ import Dice from "./Dice";
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentPlayer } from "../../redux/slices/currentPlayerSlices";
 import { setPlayers } from "../../redux/slices/playersSlices";
-import { setPlay } from '../../redux/slices/playSlices';
 import { setTurn } from '../../redux/slices/turnSlices';
 import PlayersCards from './PlayersCards';
 import { Alert } from '@mui/material';
-import { checkTurnAdvance, wait, updatePlayerPos, playTurn } from './boradFunctionality/boardFunctionality';
+import { wait, updatePlayerPos, playTurn, setFreeFromJail } from './boradFunctionality/boardFunctionality';
 import MessageDisplay from './MessageDisplay';
 import Play from './Play';
 
@@ -20,16 +19,19 @@ export default function BoardContainer() {
         { turn } = useSelector(state => state.turn),
         { currentPlayer } = useSelector(state => state.currentPlayer),
         { players } = useSelector(state => state.players),
-        { play } = useSelector(state => state.play),
         { socketEnabled } = useSelector(state => state.socketEnabled),
         { pokemons } = useSelector(state => state.pokemons),
         [roll, setRoll] = useState(""),
         [cards, setCards] = useState([]),
-        [playerPlayingTurn,setPlayerPlayingTurn]=useState(),
+        [playerPlayingTurn, setPlayerPlayingTurn] = useState(),
+        [enablePlay, setEnablePlay] = useState(false),
+        [enableDice, setEnableDice] = useState(false),
+        [diceRoll, setDiceRoll] = useState([]),
         [currentCard, setCurrentCard] = useState({ card: "", sum: "", rnd: "" }),
         dispatch = useDispatch();
 
     useEffect(() => {
+        if (currentPlayer && turn === currentPlayer.number) setEnableDice(true);
         socket.emit("socket-room", room => {
             if (room[0].slice(0, 4) !== "room") {
                 navigate("/game")
@@ -37,17 +39,27 @@ export default function BoardContainer() {
         })
 
         if (socketEnabled) {
-            socket.on("player-move", (oldPos, sum, turn, cards, players, updatedPlayers) => {
-                setPlayerPlayingTurn(turn);
-                if (turn !== currentPlayer.number) {
-                    setRoll(sum);
-                    setTimeout(() => {
-                        setRoll("")
-                    }, 4000);
+            socket.on("player-move", (oldPos, sum, turn, cards, players, updatedPlayers, diceArr) => {
+                if (turn === currentPlayer.number && currentPlayer.jail) {
+                    const jailFree = setFreeFromJail(players, currentPlayer);
+                    dispatch(setCurrentPlayer({ currentPlayer: jailFree.player }))
+                    dispatch(setPlayers({ players: jailFree.allPlayers }));
+                    socket.emit("next-turn", turn, jailFree.allPlayers);
                 }
-                walk(oldPos, sum, turn, cards, players, updatedPlayers);
+                else {
+                    setDiceRoll(diceArr);
+                    setPlayerPlayingTurn(turn);
+                    if (turn !== currentPlayer.number) {
+                        setRoll(sum);
+                        setTimeout(() => {
+                            setRoll("")
+                        }, 4000);
+                    }
+                    walk(oldPos, sum, turn, cards, players, updatedPlayers, diceArr);
+                }
             })
-            socket.on("next-turn", (turn, players) => {
+            socket.on("next-turn", async (turn, players) => {
+                if (turn === currentPlayer.number) setEnableDice(true);
                 dispatch(setTurn(turn))
                 dispatch(setPlayers({ players }))
             })
@@ -55,60 +67,71 @@ export default function BoardContainer() {
     }, [])
 
     const rolledDice = async (sum, dicesArr) => {
+        setEnableDice(false);
         const oldPos = currentPlayer.pos,
             newPos = (oldPos + sum) % 40,
             currentPlayerTemp = { ...currentPlayer, pos: newPos, money: (oldPos + sum) >= 40 ? currentPlayer.money + 2000 : currentPlayer.money };
         const updatedPlayers = playTurn([...players], turn, newPos, cards, pokemons);
-        socket.emit("player-move", oldPos, sum, turn, cards, players, updatedPlayers);
+        console.log(updatedPlayers.players);
+        socket.emit("player-move", oldPos, sum, turn, cards, players, updatedPlayers, dicesArr);
 
         dispatch(setCurrentPlayer({ currentPlayer: currentPlayerTemp }));
-        // turnPlay(newPos);
-
-        if (checkTurnAdvance(dicesArr)) {
-            //turn advance
-        }
     }
 
-    const walk = async (oldPos, sum, turn, cards, players, updatedPlayers) => {
+    const walk = async (oldPos, sum, turn, cards, players, updatedPlayers, diceArr) => {
         let newPlayers;
         for (let i = 1; i <= sum; i++) {
             await wait(300);
             newPlayers = updatePlayerPos(players, turn, i, oldPos);
             dispatch(setPlayers({ players: newPlayers }));
         }
-        turnPlay(updatedPlayers,turn);
+        turnPlay(updatedPlayers, turn, diceArr);
     }
 
-    const turnPlay = async (updatedPlayers,turn) => {
+    const turnPlay = async (updatedPlayers, turn, diceArr) => {
         const cardTemp = { card: updatedPlayers.card, sum: updatedPlayers.moneyTakeOut, rnd: updatedPlayers.rnd }
-
         setCurrentCard(cardTemp);
-        if (cardTemp.card !== "store" && typeof (cardTemp.card) !== "object") setTimeout(() => setCurrentCard({ card: "" }), 5000);
+        if (cardTemp.card !== "store" && typeof (cardTemp.card) !== "object") setTimeout(() => {
+            setCurrentCard({ card: "" })
+        }, 4000);
 
-        if (updatedPlayers.canPlayFlag) {
-            dispatch(setPlay({ play: true }));
+
+        if (updatedPlayers.canPlayFlag && turn === currentPlayer.number) {
+            setEnablePlay(true);
         }
 
         else {
             if (turn === currentPlayer.number)
                 dispatch(setCurrentPlayer({ currentPlayer: updatedPlayers.players[turn] }))
             dispatch(setPlayers({ players: updatedPlayers.players }));
-            endTurn([...updatedPlayers.players], false,turn);
-
+            endTurn([...updatedPlayers.players], false, turn, diceArr);
         }
 
     }
 
 
-    const endTurn = async(playersTemp, currentPlayer = false,turnProp) => {
-        dispatch(setPlay(false));
+    const endTurn = async (playersTemp, currentPlayer = false, turnProp, diceArr = false) => {
+        setEnablePlay(false);
         if (!playersTemp) {
             playersTemp = [...players];
             playersTemp[turnProp] = currentPlayer;
             dispatch(setPlayers({ players: playersTemp }));
         }
-        console.log(turn,turnProp,"turn")
-        socket.emit("next-turn", turnProp, playersTemp);
+
+        if (diceArr) {
+            if (diceArr[0] === diceArr[1]) {
+                socket.emit("next-turn", turnProp - 1, playersTemp);
+            }
+            else {
+                socket.emit("next-turn", turnProp, playersTemp);
+            }
+        }
+        else if (diceRoll[0] === diceRoll[1]) {
+            socket.emit("next-turn", turnProp - 1, playersTemp);
+        }
+        else {
+            socket.emit("next-turn", turnProp, playersTemp);
+        }
 
     }
 
@@ -121,9 +144,9 @@ export default function BoardContainer() {
             </div>
             <div>
                 <div className="flex column">
-                    <Dice rolledDice={rolledDice} turn={turn} currentPlayerTurn={currentPlayer?.number}></Dice>
+                    <Dice rolledDice={rolledDice} turn={turn} enableDice={enableDice} currentPlayerTurn={currentPlayer?.number}></Dice>
                 </div>
-                {play && currentPlayer.number === turn ? <Play endTurn={endTurn} currentPlayer={currentPlayer} card={currentCard}></Play> : null}
+                {enablePlay && currentPlayer.number === turn ? <Play endTurn={endTurn} turn={turn} currentPlayer={currentPlayer} card={currentCard}></Play> : null}
                 {roll ? <Alert sx={{ marginTop: "1rem" }} variant="outlined" severity="success" color="info" icon={false}>player rolled :{roll}</Alert> : null}
             </div>
 
