@@ -6,8 +6,8 @@ const io = require("socket.io")(process.env.PORT || 5000, {
 
 let latestRoom = 1;
 
-io.on("connection", socket => {
 
+io.on("connection", socket => {
 
     socket.on('create', (callback) => {
         const room = "room" + latestRoom
@@ -62,8 +62,8 @@ io.on("connection", socket => {
         cb(Array.from(socket.rooms));
     })
 
-    socket.on("player-move", (oldPos, sum, turn, cards, players, updatedPlayers,diceArr) => {
-        io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn, cards, players, updatedPlayers,diceArr)
+    socket.on("player-move", (oldPos, sum, turn, players, updatedPlayers,diceArr) => {
+        io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn, players, updatedPlayers,diceArr)
     })
     socket.on("next-turn", (turn, players) => {
         const roomPlayers = [...io.sockets.adapter.rooms.get([...socket.rooms][0])];
