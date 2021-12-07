@@ -62,17 +62,24 @@ io.on("connection", socket => {
         cb(Array.from(socket.rooms));
     })
 
-    socket.on("player-move", (oldPos, sum, turn, players, updatedPlayers,diceArr) => {
-        io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn, players, updatedPlayers,diceArr)
+    socket.on("player-move", (oldPos, sum, turn, players, updatedPlayers, diceArr, cards) => {
+        io.to([...socket.rooms][0]).emit("player-move", oldPos, sum, turn, players, updatedPlayers, diceArr, cards)
     })
-    socket.on("next-turn", (turn, players) => {
+
+    socket.on("next-turn", (turn, players,cards) => {
         const roomPlayers = [...io.sockets.adapter.rooms.get([...socket.rooms][0])];
         turn++;
         if (turn === roomPlayers.length - 1)
             turn = 0;
-        io.to([...socket.rooms][0]).emit("next-turn", turn, players)
-
+        io.to([...socket.rooms][0]).emit("next-turn", turn, players,cards)
     })
+
+    socket.on('disconnect', function () {
+        [...io.sockets.adapter.rooms].map((room) => {
+            if ([...room[1]][0] === "playing")
+                io.sockets.adapter.rooms.delete(room[0]);
+        })
+    });
 })
 
 

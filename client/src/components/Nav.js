@@ -27,9 +27,9 @@ export default function Nav() {
         }
     }
     return (
-        <Box sx={{ position: "absolute", width: "40vw" }}>
+        <Box  sx={{ position: "absolute",minWidth:"40vw" }}>
             <AppBar position="static" sx={{ background: "#AE0907" }}>
-                <Toolbar>
+                <Toolbar className="nav-bar">
                     <IconButton
                         size="large"
                         edge="start"

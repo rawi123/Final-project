@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router';
 import { setCurrentPlayer } from "../../redux/slices/currentPlayerSlices"
 import { addPlayer } from "../../redux/slices/playersSlices";
 import { addAction } from '../../redux/slices/socketActionsSlices';
+import { setPlayers } from "../../redux/slices/playersSlices"
 import Nav from "../Nav";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -60,11 +61,12 @@ export default function WaitingRoom() {
     }, [])
 
     React.useEffect(() => {
+        dispatch(setPlayers({ players: [] }));
         if (!actions.includes("play-game") && user) {
             dispatch(addAction("play-game"));
             socket.on("play-game", (roomData) => {
                 roomData.map((val, i) => {
-                    const player = { number: i, img: images[i], pos: 0, socketId: val, pokemons: [], ownedLands: [], money: 13000, jail: false };
+                    const player = { number: i, img: images[i], pos: 0, socketId: val, pokemons: [], ownedLands: [], money: 10000, jail: false };
                     if (socket.id === val) {
                         player.pokemons = user.pokemons;
                         dispatch(setCurrentPlayer({ currentPlayer: player }));

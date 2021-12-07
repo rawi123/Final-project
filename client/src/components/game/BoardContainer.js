@@ -10,8 +10,8 @@ import { setPlayers } from "../../redux/slices/playersSlices";
 import { setTurn } from '../../redux/slices/turnSlices';
 import { addActions } from "../../redux/slices/socketActionsSlices";
 import PlayersCards from './PlayersCards';
-import { Alert } from '@mui/material';
-import { wait, updatePlayerPos, playTurn, setFreeFromJail } from './boradFunctionality/boardFunctionality';
+import { Alert, Button } from '@mui/material';
+import { wait, updatePlayerPos, playTurn, setFreeFromJail, nextTurn, pay } from './boradFunctionality/boardFunctionality';
 import MessageDisplay from './MessageDisplay';
 import Play from './Play';
 
@@ -30,6 +30,7 @@ export default function BoardContainer() {
         [enableDice, setEnableDice] = useState(false),
         [diceRoll, setDiceRoll] = useState([]),
         [currentCard, setCurrentCard] = useState({ card: "", sum: "", rnd: "" }),
+        [haveToSell, setHaveToSell] = useState(false),
         dispatch = useDispatch();
 
     useEffect(() => {
@@ -41,20 +42,25 @@ export default function BoardContainer() {
         })// eslint-disable-next-line
     }, [])
 
+
     useEffect(() => {
         if (actions.length && socketEnabled && !actions.includes("player-move") && !actions.includes("next-turn")) {
-            socket.on("player-move", (oldPos, sum, turn, players, updatedPlayers, diceArr) => {
+            socket.on("player-move", (oldPos, sum, turn, players, updatedPlayers, diceArr, cards) => {
                 setDiceRoll(diceArr);
                 setPlayerPlayingTurn(turn);
+                setCards(cards);
                 if (turn !== currentPlayer.number) {
                     setRoll(diceArr);
                     setTimeout(() => {
                         setRoll([])
                     }, 4000);
                 }
-                walk(oldPos, sum, turn, players, updatedPlayers, diceArr);
+                walk(oldPos, sum, turn, players, updatedPlayers, diceArr, cards);
             })
-            socket.on("next-turn", (turn, players) => {
+            socket.on("next-turn", (turn, players, cards) => {
+                setCurrentCard({ card: "" });
+                if (cards.length)
+                    setCards(cards)
                 if (turn === currentPlayer.number) {
                     if (currentPlayer.jail === true) {
                         const jailFree = setFreeFromJail(players, currentPlayer);
@@ -80,7 +86,7 @@ export default function BoardContainer() {
             currentPlayerTemp = { ...currentPlayer, pos: newPos, money: (oldPos + sum) >= 40 ? currentPlayer.money + 2000 : currentPlayer.money },
             updatedPlayers = playTurn([...players], turn, newPos, cards, pokemons);
 
-        socket.emit("player-move", oldPos, sum, turn, players, updatedPlayers, dicesArr);
+        socket.emit("player-move", oldPos, sum, turn, players, updatedPlayers, dicesArr, cards);
         dispatch(setCurrentPlayer({ currentPlayer: currentPlayerTemp }));
     }
 
@@ -96,22 +102,28 @@ export default function BoardContainer() {
 
     const turnPlay = async (updatedPlayers, turn, diceArr) => {
         setCurrentCard(updatedPlayers);
-        if (updatedPlayers.card !== "store" && typeof (updatedPlayers.card) !== "object") setTimeout(() => {
+        if (!updatedPlayers.haveToSell && ((typeof (updatedPlayers.card) !== "object" && updatedPlayers.card !== "store") || (typeof (updatedPlayers.card) === "object" && updatedPlayers.payToPlayer))) setTimeout(() => {
             setCurrentCard({ card: "" })
         }, 4000);
 
-
-        if (updatedPlayers.canPlayFlag && turn === currentPlayer.number) {
-            setEnablePlay(true);
+        if (updatedPlayers.haveToSell && turn === currentPlayer.number) {
+            setHaveToSell(true);
+            setEnablePlay(false);
+            setEnableDice(false);
         }
 
         else {
+            if (updatedPlayers.canPlayFlag && turn === currentPlayer.number) {
+                setEnablePlay(true);
+            }
 
-            dispatch(setPlayers({ players: updatedPlayers.players }));
-            if (turn === currentPlayer.number) {
-                dispatch(setCurrentPlayer({ currentPlayer: updatedPlayers.players[turn] }))
-                await wait(3000);
-                endTurn([...updatedPlayers.players], false, turn, diceArr);
+            else {
+                dispatch(setPlayers({ players: updatedPlayers.players }));
+                if (turn === currentPlayer.number) {
+                    dispatch(setCurrentPlayer({ currentPlayer: updatedPlayers.players[turn] }))
+                    await wait(3000);
+                    endTurn([...updatedPlayers.players], false, turn, diceArr);
+                }
             }
         }
 
@@ -126,20 +138,17 @@ export default function BoardContainer() {
             playersTemp[turnProp] = currentPlayer;
             dispatch(setPlayers({ players: playersTemp }));
         }
+        nextTurn(socket, diceArr, diceRoll, turnProp, playersTemp, cards);
+    }
 
-        if (diceArr) {
-            if (diceArr[0] === diceArr[1]) {
-                socket.emit("next-turn", turnProp - 1, playersTemp);
-            }
-            else {
-                socket.emit("next-turn", turnProp, playersTemp);
-            }
-        }
-        else if (diceRoll[0] === diceRoll[1]) {
-            socket.emit("next-turn", turnProp - 1, playersTemp);
-        }
-        else {
-            socket.emit("next-turn", turnProp, playersTemp);
+    const handelPayAfterSell = () => {
+        if (currentCard.moneyTakeOut <= currentPlayer.money) {
+            const { playersTemp, currentPlayerTemp } = pay(players, currentPlayer, currentCard);
+            dispatch(setPlayers({ players: playersTemp }));
+            dispatch(setCurrentPlayer({ currentPlayer: currentPlayerTemp }));
+            setCurrentCard({ card: "" });
+            setHaveToSell(false);
+            endTurn(playersTemp, false, turn);
         }
 
     }
@@ -148,15 +157,16 @@ export default function BoardContainer() {
         <div className="board-global-container flex center">
 
             <div className="board-container">
-                <Board cards={cards} setCards={setCards} />
+                <Board cards={cards} setCards={setCards} haveToSell={haveToSell} />
                 <MessageDisplay turn={playerPlayingTurn} currentPlayer={currentPlayer} card={currentCard}></MessageDisplay>
             </div>
             <div>
                 <div className="flex column">
                     <Dice rolledDice={rolledDice} turn={turn} enableDice={enableDice} currentPlayerTurn={currentPlayer?.number}></Dice>
                 </div>
-                {enablePlay && currentPlayer.number === turn ? <Play endTurn={endTurn} turn={turn} currentPlayer={currentPlayer} card={currentCard}></Play> : null}
+                {enablePlay && currentPlayer.number === turn ? <Play setCards={setCards} cards={cards} endTurn={endTurn} turn={turn} currentPlayer={currentPlayer} card={currentCard}></Play> : null}
                 {roll.length ? <Alert sx={{ marginTop: "1rem" }} variant="outlined" severity="success" color="info" icon={false}>player rolled :{roll[0]},{roll[1]}</Alert> : null}
+                {haveToSell ? <Button onClick={handelPayAfterSell}>pay</Button> : null}
             </div>
 
             <PlayersCards currentPlayer={currentPlayer} players={players}></PlayersCards>

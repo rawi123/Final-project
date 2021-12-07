@@ -43,6 +43,26 @@
     width: 100% ;
 }
 
+.hotel{
+    width: 35%;
+}
+.top-bottom-hotel{
+    width: 70%;
+}
+.house{
+    width: 20%;
+}
+.top-bottom-house{
+    width: 33%;
+}
+.black-screen{
+    background:black;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    opacity: 0.82;
+    z-index: 3;
+}
     
 .land1 { grid-area: 12 / 12 / 14 / 14; }
 .land2 { grid-area: 11 / 12 / 12 / 14; }
@@ -86,11 +106,16 @@
 .land40 { grid-area: 12 / 11 / 14 / 12; }
 
 .poke-card{
+    background: white;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: 100% ;
     position: relative;
+}
+.enable-sell{
+    z-index: 10;
+    cursor: pointer;
 }
 
 .player{
