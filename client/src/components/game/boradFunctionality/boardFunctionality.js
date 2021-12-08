@@ -15,14 +15,17 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
 
     let moneyTakeOut = Math.floor(Math.random() * (2001 - 500) + 500);
     let canPlayFlag = false;
-    let payToPlayer = null;
     let haveToSell = false;
+    let lost = false;
+    let payToPlayer = null;
+
 
     if (typeof cards[newPos] === "object") {
         const landCard = cards[newPos];
         if (landCard.owner !== null && landCard.owner !== playerCurrent.number) {
             let landOwner = { ...players[landCard.owner] };
             let multiply = 1;
+
             if (checkColorOwned(cards, landCard.owner, landCard.pokemon.color) === 3) //if player have all 3 colored lands 10% more
                 multiply = 1.1;
 
@@ -38,7 +41,11 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
             payToPlayer = landCard.owner;
 
             if (playerCurrent.money < moneyTakeOut) {
-                haveToSell = true;
+                const assetsValue = valuateAssets(cards, playerCurrent);
+                if (moneyTakeOut > assetsValue)
+                    lost = true;
+
+                else haveToSell = true;
             }
 
             else {
@@ -57,7 +64,12 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
             playerCurrent.money -= moneyTakeOut;
         }
         else {
-            haveToSell = true;
+            const assetsValue = valuateAssets(cards, playerCurrent);
+
+            if (moneyTakeOut > assetsValue)
+                lost = true;
+
+            else haveToSell = true;
         }
     }
 
@@ -71,7 +83,11 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
                 playerCurrent.money -= moneyTakeOut;
             }
             else {
-                haveToSell = true;
+                const assetsValue = valuateAssets(cards, playerCurrent);
+                if (moneyTakeOut > assetsValue) {
+                    lost = true;
+                }
+                else haveToSell = true;
             }
         }
 
@@ -92,8 +108,26 @@ export const playTurn = (players, turn, newPos, cards, pokemons) => {
     moneyTakeOut = parseInt(moneyTakeOut);
     playerCurrent.pos = newPos;
     players[turn] = playerCurrent;
-    return { canPlayFlag, players, card: cards[newPos], moneyTakeOut, rnd, payToPlayer, haveToSell, pos: newPos };
+    return { canPlayFlag, players, card: cards[newPos], moneyTakeOut, rnd, payToPlayer, haveToSell, pos: newPos, lost };
 }
+
+
+
+
+const valuateAssets = (cards, currentPlayer) => {
+    return (cards.reduce((sum, val) => {
+        if (typeof val === "object" && val.owner === currentPlayer.number) {
+            sum += parseInt(val.pokemon.cost * 0.5) * val.houses;
+        }
+        return sum;
+    }, 0) + currentPlayer.money)
+}
+
+
+
+
+
+
 
 export const checkColorOwned = (cards, owner, color) =>
     cards.reduce((sum, val) => {
@@ -118,7 +152,11 @@ export const setFreeFromJail = (allPlayers, player) => {
     return { allPlayers: allPlayersTemp, player: playerTemp }
 }
 
-export const nextTurn = (socket, diceArr, diceRoll, turnProp, playersTemp, cards) => {
+export const nextTurn = (socket, diceArr, diceRoll, turnProp, playersTemp, cards, checkDice) => {
+    if (!checkDice) {
+        socket.emit("next-turn", turnProp, playersTemp, cards);
+    }
+
     if (diceArr) {
         if (diceArr[0] === diceArr[1]) {
             socket.emit("next-turn", turnProp - 1, playersTemp, cards);
@@ -139,6 +177,7 @@ export const pay = (players, currentPlayer, currentCard) => {
     const currentPlayerTemp = { ...currentPlayer };
     const payPlayer = { ...players[currentCard.payToPlayer] };
     const playersTemp = [...players];
+
     currentPlayerTemp.money -= currentCard.moneyTakeOut;
     playersTemp[currentPlayerTemp.number] = currentPlayerTemp;
     playersTemp[payPlayer.number] = payPlayer;
@@ -147,4 +186,30 @@ export const pay = (players, currentPlayer, currentCard) => {
         payPlayer.money += currentCard.moneyTakeOut;
 
     return { playersTemp: playersTemp, currentPlayerTemp: currentPlayerTemp }
+}
+
+
+export const sellPlayerHouses = (cards,players, currentPlayer) => {
+    const currentPlayerTemp = { ...currentPlayer };
+
+    const cardsTemp = cards.map(card => {
+        if (typeof card === "object" && card.owner === currentPlayer.number) {
+            card.owner = null;
+            currentPlayerTemp.money = parseInt(card.pokemon.cost * 0.5) * card.houses;
+            card.houses=0;
+        }
+        return card;
+    })
+
+    players[currentPlayer.number]=currentPlayerTemp;
+    return {cardsTemp,playersTempAfterSell:players,currentPlayerTemp};
+}
+
+
+export const checkWin=(players,turn,currentPlayer,setCurrentCard)=>{
+    if(players.length===1 && currentPlayer.number===turn){
+        return true;
+    }
+    return false;
+
 }
