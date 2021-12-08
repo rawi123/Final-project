@@ -12,7 +12,7 @@ app.use(cors());
 app.use("/user", require('./routers/userRouter'));
 app.use("/pokemon", require('./routers/pokemonRouter'));
 
-mongoose.connect(`mongodb://localhost/monfense`, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGOOSE_URL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(data => {
         app.listen(process.env.PORT || 4000);
         console.log("connected to db port 4000");
