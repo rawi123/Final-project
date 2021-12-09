@@ -16,7 +16,6 @@ import MessageDisplay from './MessageDisplay';
 import Play from './Play';
 import { lostGame, winGame } from '../../api/userApi';
 import { setUser } from '../../redux/slices/userSlices';
-import { setSocketEnabled } from "../../redux/slices/socketRunSlices";
 
 export default function BoardContainer() {
     const navigate = useNavigate(),
@@ -38,20 +37,19 @@ export default function BoardContainer() {
         dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(setTurn(0));
-        setCurrentCard({ card: "", sum: "", rnd: "" });
         if (currentPlayer && 0 === currentPlayer.number) setEnableDice(true);
+
         socket.emit("socket-room", room => {
             if (room[0].slice(0, 4) !== "room") {
                 navigate("/game")
             }
         })
-        return (() => {
-            socket.emit("socket-room", room => {
-                socket.emit("leave-room", room);
-                window.location.reload(false);
-            })
-        })
+        // return (() => {
+        //     socket.emit("socket-room", room => {
+        //         socket.emit("leave-room", room);
+        //         window.location.reload(false);
+        //     })
+        // })
         // eslint-disable-next-line
     }, [])
 
@@ -69,18 +67,21 @@ export default function BoardContainer() {
                     }, 4000);
                 }
 
-                walk(oldPos, sum, turn, players, updatedPlayers, diceArr);
+                walk(oldPos, sum, turn, players, updatedPlayers, diceArr, cardsProp);
             })
 
             socket.on("next-turn", async (turn, players, cards) => {
+
                 const currentFind = players.find(val => val.number === currentPlayer.number)
                 dispatch(setCurrentPlayer({ currentPlayer: currentFind }))
                 setCurrentCard({ card: "" });
                 if (checkWin(players, turn, currentPlayer, setCurrentCard)) {
                     setCurrentCard({ card: "win" })
                     await wait(3000);
-                    const data = await winGame(user);
-                    dispatch(setUser({ user: data }));
+                    if (user.username !== "guest") {
+                        const data = await winGame(user);
+                        dispatch(setUser({ user: data }));
+                    }
                     navigate("/game");
                 }
 
@@ -104,8 +105,7 @@ export default function BoardContainer() {
                 dispatch(setPlayers({ players }))
             })
             dispatch(addActions(["next-turn", "player-move"]))
-        }// eslint-disable-next-line
-
+        }
         // eslint-disable-next-line
     }, [actions, cards])
 
@@ -116,7 +116,7 @@ export default function BoardContainer() {
         setEnablePlay(false);
 
         const oldPos = currentPlayer.pos,
-            newPos = (oldPos + sum) % 40,
+            newPos = (oldPos + sum) % 40,//
             currentPlayerTemp = { ...currentPlayer, pos: newPos, money: (oldPos + sum) >= 40 ? currentPlayer.money + 2000 : currentPlayer.money },
             updatedPlayers = playTurn([...players], turn, newPos, cards, pokemons);
 
@@ -124,7 +124,7 @@ export default function BoardContainer() {
         dispatch(setCurrentPlayer({ currentPlayer: currentPlayerTemp }));
     }
 
-    const walk = async (oldPos, sum, turn, players, updatedPlayers, diceArr) => {
+    const walk = async (oldPos, sum, turn, players, updatedPlayers, diceArr, cardsProp) => {
         let newPlayers;
 
         for (let i = 1; i <= sum; i++) {
@@ -133,18 +133,22 @@ export default function BoardContainer() {
             dispatch(setPlayers({ players: newPlayers }));
         }
 
-        turnPlay(updatedPlayers, turn, diceArr);
+        turnPlay(updatedPlayers, turn, diceArr, cardsProp);
     }
 
 
-    const turnPlay = async (updatedPlayers, turn, diceArr) => {
+    const turnPlay = async (updatedPlayers, turn, diceArr, cardsProp) => {
+
         if (!updatedPlayers.lost)
             setCurrentCard(updatedPlayers);
         else {
             setCurrentCard({ card: `lost`, player: `player ${turn + 1}` });
         }
+        console.log(updatedPlayers.payToPlayer);
         let timeOut;
-        if (!updatedPlayers.haveToSell && ((typeof (updatedPlayers.card) !== "object" && updatedPlayers.card !== "store") || (typeof (updatedPlayers.card) === "object" && updatedPlayers.payToPlayer)))
+
+        if (!updatedPlayers.haveToSell &&
+            ((typeof (updatedPlayers.card) !== "object" && updatedPlayers.card !== "store") || (typeof (updatedPlayers.card) === "object" && updatedPlayers.payToPlayer!==null)))
             timeOut = setTimeout(() => {
                 setCurrentCard({ card: "" })
             }, 4000);
@@ -165,7 +169,7 @@ export default function BoardContainer() {
                 if (turn === currentPlayer.number) {
                     dispatch(setCurrentPlayer({ currentPlayer: updatedPlayers.players[turn] }))
                     await wait(3000);
-                    endTurn([...updatedPlayers.players], false, turn, diceArr);
+                    endTurn([...updatedPlayers.players], false, turn, diceArr, true, cardsProp);
                 }
             }
         }
@@ -178,10 +182,16 @@ export default function BoardContainer() {
 
             setCurrentPlayer({ currentPlayer: null });
             setCurrentCard({ card: "lost" });
-            
+
+            if (user.username !== "guest") {
+                const data = await lostGame(user);
+                dispatch(setUser({ user: data }));
+            }
             await wait(3000);
 
+
             navigate("/game");
+
 
             endTurn(playersTemp, false, turn, false, false, cardsTemp);
         }
@@ -190,9 +200,7 @@ export default function BoardContainer() {
         }
     }
 
-
     const endTurn = (playersTemp, currentPlayer = false, turnProp, diceArr = false, checkDice = true, cardsTemp = null) => {
-
         setEnablePlay(false);
 
         if (!playersTemp) {
@@ -205,6 +213,7 @@ export default function BoardContainer() {
     }
 
     const handelPayAfterSell = (updatedPlayers = false, newPlayers = false, turn = false) => {
+
         if (newPlayers || currentCard.moneyTakeOut <= currentPlayer.money) {
             const { playersTemp, currentPlayerTemp } = pay(newPlayers || players, newPlayers[turn] || currentPlayer, updatedPlayers || currentCard);
 
@@ -234,7 +243,7 @@ export default function BoardContainer() {
                 </div>
                 {enablePlay && currentPlayer.number === turn ? <Play setCards={setCards} cards={cards} endTurn={endTurn} turn={turn} currentPlayer={currentPlayer} card={currentCard}></Play> : null}
                 {roll.length ? <Alert sx={{ marginTop: "1rem" }} variant="outlined" severity="success" color="info" icon={false}>player rolled :{roll[0]},{roll[1]}</Alert> : null}
-                {haveToSell ? <Button onClick={handelPayAfterSell}>pay</Button> : null}
+                {haveToSell ? <Button onClick={() => handelPayAfterSell()}>pay</Button> : null}
             </div>
 
             <PlayersCards turn={turn} haveToSell={haveToSell} currentPlayer={currentPlayer} players={players}></PlayersCards>
