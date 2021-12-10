@@ -47,11 +47,11 @@ io.on("connection", socket => {
 
     socket.on("start-game", (room) => {
         const roomData = io.sockets.adapter.rooms.get(room);
-        // if (roomData.size >= 2) {
-        io.emit('return-rooms', getRooms());
-        io.to(room).emit("play-game", [...roomData]);
-        roomData.add("playing");
-        // }
+        if (roomData.size >= 2) {
+            io.emit('return-rooms', getRooms());
+            io.to(room).emit("play-game", [...roomData], room);
+            roomData.add("playing");
+        }
     })
 
     socket.on("send-message", (message, room) => {
@@ -72,8 +72,16 @@ io.on("connection", socket => {
 
         if (!newTurn) newTurn = players[0].number
         else newTurn = newTurn.number;
-        
+
         io.to([...socket.rooms][0]).emit("next-turn", newTurn, players, cards)
+    })
+
+    socket.on("fight-started", pokemonFight => {
+        io.to([...socket.rooms][0]).emit("fight-started", pokemonFight)
+    })
+
+    socket.on("pokemon-play-turn", (newPokemons, method, attackingName, attackingEnemy, damage) => {
+        io.to([...socket.rooms][0]).emit("pokemon-play-turn", newPokemons, method, attackingName, attackingEnemy, damage);
     })
 
     socket.on('disconnect', function () {
